@@ -1,4 +1,4 @@
-# iw
+# IW - Proyecto Frenemy
 
 Material para la asignatura de Ingeniería Web, edición 2022-23, de la Facultad de Informática UCM
 
