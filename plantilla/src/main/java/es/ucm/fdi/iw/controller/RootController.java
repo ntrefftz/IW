@@ -49,4 +49,12 @@ public class RootController {
     public String game(Model model) {
         return "game";
     }
+    @GetMapping("/profile")
+    public String profile(Model model) {
+        return "profile";
+    }
+    @GetMapping("/lobby-select")
+    public String lobby_select(Model model) {
+        return "lobby-select";
+    }
 }
