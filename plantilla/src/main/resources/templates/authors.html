@@ -1,37 +1,42 @@
 <!DOCTYPE html>
-<html class="h-100" xmlns:th="http://www.thymeleaf.org">
-
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <th:block th:replace="~{fragments/head :: header}" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Autores</title>
 </head>
+<body>
+    <header>
+        <h1>Equipo de Desarrollo</h1>
+    </header>
 
-<body class="d-flex flex-column h-100">
-    <header th:replace="~{fragments/nav.html :: nav}"></header>
+    <main>
+        <section>
+            <figure>
+                <img src="@{/img/pcs-pic.jpg}" alt="Foto de Pablo Cruz Sojo" />
+                <figcaption>Pablo Cruz Sojo</figcaption>
+            </figure>
 
-    <main class="flex-shrink-0">
-        <div class="container">
-            <h1 class="mt-5 mb-4 text-center">Equipo de Desarrollo</h1>
+            <figure>
+                <img src="@{/img/jff-pic.jpg}" alt="Foto de Javier Figuerol Farré" />
+                <figcaption>Javier Figuerol Farré</figcaption>
+            </figure>
 
-            <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
+            <figure>
+                <img src="@{/img/pgg-pic.jpg}" alt="Foto de PAULA GUADILLA GÓMEZ" />
+                <figcaption>PAULA GUADILLA GÓMEZ</figcaption>
+            </figure>
 
-                <div class="col">
-                    <div class="card h-100 shadow-sm img-fluid">
-                        <img th:src="@{/img/pcs-pic.jpg}" 
-                             class="card-img-top" 
-                             alt="Foto de Autor 1" 
-                             style="height: 250px; object-fit: cover;">
-                        
-                        <div class="card-body text-center">
-                            <h5 class="card-title fw-bold">Pablo Cruz Sojo</h5>
-                        </div>
-                    </div>
-                </div>
-                </div>
-            </div>
+            <figure>
+                <img src="@{/img/ljg-pic.jpg}" alt="Foto de LUIS JARIOD GUERRERO" />
+                <figcaption>LUIS JARIOD GUERRERO</figcaption>
+            </figure>
+
+            <figure>
+                <img src="@{/img/ntf-pic.jpg}" alt="Foto de Nicolás Emmanuel Trefftz Fernández" />
+                <figcaption>Nicolás Emmanuel Trefftz Fernández</figcaption>
+            </figure>
+        </section>
     </main>
-
-    <th:block th:replace="~{fragments/footer.html :: footer}" />
 </body>
-
 </html>
