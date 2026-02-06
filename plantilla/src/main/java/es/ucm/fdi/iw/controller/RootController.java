@@ -37,8 +37,16 @@ public class RootController {
         return "index";
     }
 
-    @GetMapping("/autores")
-    public String autores(Model model) {
-        return "autores";
+    @GetMapping("/authors")
+    public String authors(Model model) {
+        return "authors";
+    }
+    @GetMapping("/lobby")
+    public String lobby(Model model) {
+        return "lobby";
+    }
+    @GetMapping("/game")
+    public String game(Model model) {
+        return "game";
     }
 }

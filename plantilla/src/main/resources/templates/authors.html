@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html class="h-100" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: header}" />
+    <title>Autores</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+    <header th:replace="~{fragments/nav.html :: nav}"></header>
+
+    <main class="flex-shrink-0">
+        <div class="container">
+            <h1 class="mt-5 mb-4 text-center">Equipo de Desarrollo</h1>
+
+            <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
+
+                <div class="col">
+                    <div class="card h-100 shadow-sm img-fluid">
+                        <img th:src="@{/img/pcs-pic.jpg}" 
+                             class="card-img-top" 
+                             alt="Foto de Autor 1" 
+                             style="height: 250px; object-fit: cover;">
+                        
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold">Pablo Cruz Sojo</h5>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+    </main>
+
+    <th:block th:replace="~{fragments/footer.html :: footer}" />
+</body>
+
+</html>
