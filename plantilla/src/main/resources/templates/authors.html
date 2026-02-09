@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <th:block th:replace="~{fragments/head :: header}" />
     <title>Autores</title>
 </head>
 <body>
@@ -10,33 +9,80 @@
         <h1>Equipo de Desarrollo</h1>
     </header>
 
-    <main>
-        <section>
-            <figure>
-                <img src="/img/pcs-pic.jpg" th:src="@{/img/pcs-pic.jpg}" alt="Foto de Pablo Cruz Sojo" width="300" height="300" />
-                <figcaption>Pablo Cruz Sojo</figcaption>
-            </figure>
+<body class="d-flex flex-column h-100">
+    <header th:replace="~{fragments/nav.html :: nav}"></header>
 
-            <figure>
-                <img src="/img/jff-pic.jpg" th:src="@{/img/jff-pic.jpg}" alt="Foto de Javier Figuerol Farré" width="300" height="300" />
-                <figcaption>Javier Figuerol Farré</figcaption>
-            </figure>
+    <main class="flex-shrink-0">
+        <div class="container">
+            <h1 class="mt-5 mb-4 text-center">Equipo de Desarrollo</h1>
 
-            <figure>
-                <img src="/img/pgg-pic.jpg" th:src="@{/img/pgg-pic.jpg}" alt="Foto de PAULA GUADILLA GÓMEZ" width="300" height="300" />
-                <figcaption>Paula Guadilla Gómez</figcaption>
-            </figure>
+            <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
 
-            <figure>
-                <img src="/img/ljg-pic.jpg" th:src="@{/img/ljg-pic.jpg}" alt="Foto de LUIS JARIOD GUERRERO" width="300" height="300" />
-                <figcaption>Luis Jariod Guerrero</figcaption>
-            </figure>
-
-            <figure>
-                <img src="/img/ntf-pic.jpg" th:src="@{/img/ntf-pic.jpg}" alt="Foto de Nicolás Emmanuel Trefftz Fernández" width="300" height="300" />
-                <figcaption>Nicolás Emmanuel Trefftz Fernández</figcaption>
-            </figure>
-        </section>
+                <div class="col">
+                    <div class="card h-100 shadow-sm img-fluid">
+                        <img th:src="@{/img/pcs-pic.jpg}" 
+                             class="card-img-top" 
+                             alt="Foto de Pablo Cruz Sojo" 
+                             style="height: 250px; object-fit: cover;">
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold">Pablo Cruz Sojo</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 shadow-sm img-fluid">
+                        <img th:src="@{/img/jff-pic.jpg}" 
+                             class="card-img-top" 
+                             alt="Foto de Javier Figuerol Farré" 
+                             style="height: 250px; object-fit: cover;">
+                        
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold">Javier Figuerol Farré</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 shadow-sm img-fluid">
+                        <img th:src="@{/img/pgg-pic.jpg}" 
+                             class="card-img-top" 
+                             alt="Foto de Paula Guadilla Gómez" 
+                             style="height: 250px; object-fit: cover;">
+                        
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold">Paula Guadilla Gómez</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 shadow-sm img-fluid">
+                        <img th:src="@{/img/ljg-pic.jpg}" 
+                             class="card-img-top" 
+                             alt="Foto de Luis Jariod Guerrero" 
+                             style="height: 250px; object-fit: cover;">
+                        
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold">Luis Jariod Guerrero</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 shadow-sm img-fluid">
+                        <img th:src="@{/img/ntf-pic.jpg}" 
+                             class="card-img-top" 
+                             alt="Foto de Nicolás Emmanuel Trefftz Fernández" 
+                             style="height: 250px; object-fit: cover;">
+                        
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold">Nicolás Emmanuel Trefftz Fernández</h5>
+                        </div>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
     </main>
+
+    <th:block th:replace="~{fragments/footer.html :: footer}" />
 </body>
+
 </html>
