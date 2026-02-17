@@ -22,6 +22,25 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ms-auto">
                         <th:block th:if="${u}">
+                            
+                             <li class="nav-item mx-2">
+                                <a class="nav-link" th:href="@{/login}" href="/login">Login</a>
+                            </li>
+                            <li class="nav-item mx-2">
+                                <a class="nav-link" th:href="@{/authors}" href="/authors">Autores</a>
+                            </li>
+                            <li class="nav-item mx-2">
+                                <a class="nav-link" th:href="@{game}" href="/game">Partida</a>
+                            </li>
+                            <li class="nav-item mx-2">
+                                <a class="nav-link" th:href="@{/lobby}" href="/lobby">Lobby</a>
+                            </li>
+                            <li class="nav-item mx-2">
+                                <a class="nav-link" th:href="@{/lobby-select}" href="/lobby-select">Selector de lobbies</a>
+                            </li>
+                            <li class="nav-item mx-2">
+                                <a class="nav-link" th:href="@{/profile}" href="/profile">Perfil</a>
+                            </li>
                             <li class="nav-item mx-3">
                                 <a class="nav-link" th:if="${u.hasRole('ADMIN')}" th:href="@{/admin/}">Administrar</a>
                             </li>
@@ -42,24 +61,6 @@
                                     <button type="submit" class="btn btn-outline-secondary btn-sm">logout</button>
                                 </form>
                             </li>
-                             <li class="nav-item mx-2">
-                                <a class="nav-link" th:href="@{/login}" href="/login">Login</a>
-                            </li>
-                            <li class="nav-item mx-2">
-                                <a class="nav-link" th:href="@{/authors}" href="/authors">Autores</a>
-                            </li>
-                            <li class="nav-item mx-2">
-                                <a class="nav-link" th:href="@{game}" href="/game">Partida</a>
-                            </li>
-                            <li class="nav-item mx-2">
-                                <a class="nav-link" th:href="@{/lobby}" href="/lobby">Lobby</a>
-                            </li>
-                            <li class="nav-item mx-2">
-                                <a class="nav-link" th:href="@{/lobby-select}" href="/lobby-select">Selector de lobbies</a>
-                            </li>
-                            <li class="nav-item mx-2">
-                                <a class="nav-link" th:href="@{/profile}" href="/profile">Perfil</a>
-                            </li>
                         </th:block>
                         <th:block th:unless="${u}">
                             <li class="nav-item mx-2">
@@ -68,18 +69,7 @@
                             <li class="nav-item mx-2">
                                 <a class="nav-link" th:href="@{/authors}" href="/authors">Autores</a>
                             </li>
-                            <li class="nav-item mx-2">
-                                <a class="nav-link" th:href="@{game}" href="/game">Partida</a>
-                            </li>
-                            <li class="nav-item mx-2">
-                                <a class="nav-link" th:href="@{/lobby}" href="/lobby">Lobby</a>
-                            </li>
-                            <li class="nav-item mx-2">
-                                <a class="nav-link" th:href="@{/lobby-select}" href="/lobby-select">Selector de lobbies</a>
-                            </li>
-                            <li class="nav-item mx-2">
-                                <a class="nav-link" th:href="@{/profile}" href="/profile">Perfil</a>
-                            </li>
+                            
                             <!--/*
                                 Esto es un comentario "thymeleaf" - no se verá en el HTML
                                 El bloque de "debug" sólo está activado si application.properties tiene debug a "true"
