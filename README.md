@@ -35,8 +35,15 @@
     - **fragments/nav.html** - para incluir al comienzo del `<body>`, contiene una navbar.
     - **fragments/footer.html** - para incluir al final del `<body>`, con un footer. Se debe tener en cuenta que es donde se cargan los .js de bootstrap, además de `stomp.js` e `iw.js`.
     - **error.html** - usada cuando se producen errores. Tiene un comportamiento muy distinto cuando la aplicación está en modo `debug` y cuando no lo está. 
-    - **profile.html** - vista de usuario. Debería mostrar información sobre un usuario. Aun en desarrollo
-  
+    - **profile.html** - vista de usuario. Debería mostrar información sobre un usuario. Aun en desarrollo.
+    - **admin.html** - aún en desarrollo.
+    - **authors.html** - muestra el equipo de desarrollo con una foto de cada integrante.
+    - **game.html** - vista de la partida. Debería mostrar el juego.
+    - **index.html** - vista de la página principal. Muestra una breve explicación de la funcionalidad de la página web.
+    - **lobby-select.html** - vista del selector de lobbies. Muestra lobbies creados por la gente en los que te puedes unir. También ha un botón para crear un lobby.
+    - **lobby.html** - muestra la sala de espera antes de entrar a una partida.
+    - **login.html** - muestra la página para iniciar sesión. Te pide un nombre de usuario y una contraseña.
+
   * **application.properties** - contiene la configuración general de la aplicación. Ojo porque ciertas configuraciones se hacen en los ficheros `XyzConfig.java` vistos anteriormente. Por ejemplo, qué roles pueden acceder a qué rutas se configura desde `SecurityConfig.java`.
   * **import.sql** - contiene código SQL para inicializar la BBDD. La configuración inicial hace que la BBDD se borre y reinicialice a cada arranque, lo cual es útil para pruebas. Es posible cambiarla para que la BBDD persista entre arraques de la aplicación, y se ignore el `import.sql`.
     
