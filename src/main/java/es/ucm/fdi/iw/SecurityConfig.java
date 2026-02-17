@@ -58,11 +58,11 @@ public class SecurityConfig {
 				.csrf(csrf -> csrf
 						.ignoringRequestMatchers("/api/**"))
 				.authorizeHttpRequests(authorize -> authorize
-						.requestMatchers("/authors").permitAll() // <-- pagina de autores
-						.requestMatchers("/lobby").permitAll() // <-- pagina de autores
-						.requestMatchers("/game").permitAll() // <-- pagina de autores
-						.requestMatchers("/profile").permitAll() // <-- pagina de autores
-						.requestMatchers("/lobby-select").permitAll() // <-- pagina de autores
+						 .requestMatchers("/authors").permitAll() // <-- pagina de autores
+						// .requestMatchers("/lobby").permitAll() // <-- pagina de autores
+						// .requestMatchers("/game").permitAll() // <-- pagina de autores
+						// .requestMatchers("/profile").permitAll() // <-- pagina de autores
+						// .requestMatchers("/lobby-select").permitAll() // <-- pagina de autores
 						.requestMatchers("/css/**", "/js/**", "/img/**", "/", "/error").permitAll()
 						.requestMatchers("/api/**").permitAll() // <-- public api access
 						.requestMatchers("/admin/**").hasRole("ADMIN") // <-- administration
