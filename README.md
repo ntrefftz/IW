@@ -32,10 +32,10 @@
   * **templates/** - contiene vistas, y fragmentos de vista (en `templates/fragments`)
   
     - **fragments/head.html** - para incluir en el `<head>` de tus páginas. Incluída desde  
-    - **fragments/nav.html** - para incluir al comienzo del `<body>`, contiene una navbar. *Cambia los contenidos* para que tengan sentido para tu aplicación.    
-    - **fragments/footer.html** - para incluir al final del `<body>`, con un footer. *Cambia su contenido visual*, pero ten en cuenta que es donde se cargan los .js de bootstrap, además de `stomp.js` e `iw.js`.
+    - **fragments/nav.html** - para incluir al comienzo del `<body>`, contiene una navbar.
+    - **fragments/footer.html** - para incluir al final del `<body>`, con un footer. Se debe tener en cuenta que es donde se cargan los .js de bootstrap, además de `stomp.js` e `iw.js`.
     - **error.html** - usada cuando se producen errores. Tiene un comportamiento muy distinto cuando la aplicación está en modo `debug` y cuando no lo está. 
-    - **user.html** - vista de usuario. Debería mostrar información sobre un usuario, y posiblemente formularios para modificarle, pero en la plantilla se usa para demostrar funcionamiento de AJAX y websockets, en conjunción con `static/js/ajax-demo.js`. Deberías, lógicamente, *cambiar su contenido*.
+    - **profile.html** - vista de usuario. Debería mostrar información sobre un usuario. Aun en desarrollo
   
   * **application.properties** - contiene la configuración general de la aplicación. Ojo porque ciertas configuraciones se hacen en los ficheros `XyzConfig.java` vistos anteriormente. Por ejemplo, qué roles pueden acceder a qué rutas se configura desde `SecurityConfig.java`.
   * **import.sql** - contiene código SQL para inicializar la BBDD. La configuración inicial hace que la BBDD se borre y reinicialice a cada arranque, lo cual es útil para pruebas. Es posible cambiarla para que la BBDD persista entre arraques de la aplicación, y se ignore el `import.sql`.
