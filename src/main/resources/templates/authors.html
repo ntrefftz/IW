@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
+
     <th:block th:replace="~{fragments/head :: header}" />
     <title>Autores</title>
 </head>
-<body>
-    <header>
-        <h1>Equipo de Desarrollo</h1>
-    </header>
+
 
 <body class="d-flex flex-column h-100">
     <header th:replace="~{fragments/nav.html :: nav}"></header>
@@ -81,7 +79,11 @@
             </div>
     </main>
 
-    <th:block th:replace="~{fragments/footer.html :: footer}" />
+    <div class="footer mt-4">
+
+        <th:block th:replace="~{fragments/footer.html :: footer}" />
+    </div>
+    
 </body>
 
 </html>
