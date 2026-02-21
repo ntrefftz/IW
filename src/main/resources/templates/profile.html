@@ -3,17 +3,125 @@
 
 <head>
     <th:block th:replace="~{fragments/head :: header}" />
-    <title>IW: Welcome</title>
+    <title>IW: Bienvenido</title>
 </head>
 
 <body class="d-flex flex-column h-100">
     <header th:replace="~{fragments/nav.html :: nav}"></header>
 
     <main class="flex-shrink-0">
-        <div class="container">
-            <h1 class="mt-5">Perfil</h1>
-            <p>En esta página estará el perfil del usuario (si está registrado y loggeado)</p>
-            <img th:src="@{/img/profile_sketch.png}" src="/img/profile_sketch.png" style="height: 500px; object-fit: cover;" alt="Boceto de pagina de perfil">
+        <div class="container mt-5 mb-5">
+            
+            <h1 class="mb-4">Perfil de Usuario</h1>
+
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <img th:src="@{/img/default-avatar.jpg}" src="https://via.placeholder.com/100" class="rounded-circle me-4" alt="Avatar" style="width: 100px; height: 100px; object-fit: cover;">
+                    <div>
+                        <h2 class="card-title mb-1">Larsa</h2>
+                        <p class="text-muted mb-2">Amante de los juegos • Nivel 42</p>
+                        
+                        <span class="badge bg-warning text-dark">Maestro del Tablero</span>
+                        <span class="badge bg-danger">Top Jugador</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    
+                    <h4 class="mb-3">Estadísticas</h4>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="card text-center shadow-sm h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted">Partidas Jugadas</h6>
+                                    <h3 class="card-text">342</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center shadow-sm h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted">Partidas Ganadas</h6>
+                                    <h3 class="card-text text-success">187</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center shadow-sm h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted">Puntos Totales</h6>
+                                    <h3 class="card-text text-primary">24.580</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="mb-3">Logros</h4>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">¡Imparable!</h5>
+                                    <p class="card-text text-muted small">Gana 100 partidas</p>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">100%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Señor de los Dados</h5>
+                                    <p class="card-text text-muted small">Gana 10 partidas seguidas</p>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">100%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mt-4 mt-lg-0">
+                    <h4 class="mb-3">Best Frenemies</h4>
+                    <div class="card shadow-sm">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex align-items-center py-3">
+                                <div class="bg-danger text-white rounded-circle d-flex justify-content-center align-items-center me-3 fw-bold" style="width: 45px; height: 45px;">S</div>
+                                <div>
+                                    <h6 class="m-0">SpiritBreaker939</h6>
+                                    <small class="text-muted">45 partidas juntos</small>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex align-items-center py-3">
+                                <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-3 fw-bold" style="width: 45px; height: 45px;">C</div>
+                                <div>
+                                    <h6 class="m-0">Cacasecaxx</h6>
+                                    <small class="text-muted">38 partidas juntos</small>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex align-items-center py-3">
+                                <div class="bg-info text-dark rounded-circle d-flex justify-content-center align-items-center me-3 fw-bold" style="width: 45px; height: 45px;">Z</div>
+                                <div>
+                                    <h6 class="m-0">Zumrums_23</h6>
+                                    <small class="text-muted">32 partidas juntos</small>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex align-items-center py-3">
+                                <div class="bg-secondary text-white rounded-circle d-flex justify-content-center align-items-center me-3 fw-bold" style="width: 45px; height: 45px;">R</div>
+                                <div>
+                                    <h6 class="m-0">RayFrostNe</h6>
+                                    <small class="text-muted">28 partidas juntos</small>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+            </div>
         </div>
     </main>
 
