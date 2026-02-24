@@ -1,4 +1,4 @@
-package es.ucm.fdi.iw.model;
+// package es.ucm.fdi.iw.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
