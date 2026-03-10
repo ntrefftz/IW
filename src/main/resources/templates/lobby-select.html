@@ -12,7 +12,68 @@
     <main class="flex-shrink-0">
         <div class="container">
             <h1 class="mt-5">Buscador de lobbies</h1>
-            <p>En esta página se podrán ver lobbies públicas para poderte unir a randoms (si no tienes amigos)</p>
+            <p class="mb-4">Únete con código o elige una partida pública disponible.</p>
+
+            <section class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Unirse a una partida</h2>
+
+                    <form th:action="@{/lobbies/join}" method="post" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="gameCode" class="form-label">Código de partida</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="gameCode"
+                                name="code"
+                                placeholder="Ej: ABC123"
+                                required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="gamePassword" class="form-label">Contraseña</label>
+                            <input
+                                type="password"
+                                class="form-control"
+                                id="gamePassword"
+                                name="password"
+                                placeholder="Introduce la contraseña">
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Unirse</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section class="card shadow-sm mb-5">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">Partidas públicas</h2>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Código de partida</th>
+                                    <th scope="col">Tipo de juego</th>
+                                    <th scope="col">Número de jugadores</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="lobby : ${publicLobbies}">
+                                    <td th:text="${lobby.code}">ABC123</td>
+                                    <td th:text="${lobby.gameType}">uno</td>
+                                    <td th:text="${lobby.playerCount}">3</td>
+                                </tr>
+                                <tr th:if="${publicLobbies == null || #lists.isEmpty(publicLobbies)}">
+                                    <td colspan="3" class="text-center text-muted">No hay partidas públicas disponibles.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
