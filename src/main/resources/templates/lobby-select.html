@@ -3,81 +3,100 @@
 
 <head>
     <th:block th:replace="~{fragments/head :: header}" />
-    <title>IW: Welcome</title>
+    <title>IW: Selector de Lobbies</title>
 </head>
 
-<body class="d-flex flex-column h-100">
+<body class="d-flex flex-column h-100 bg-white text-dark">
     <header th:replace="~{fragments/nav.html :: nav}"></header>
 
     <main class="flex-shrink-0">
-        <div class="container">
-            <h1 class="mt-5">Buscador de lobbies</h1>
-            <p class="mb-4">Únete con código o elige una partida pública disponible.</p>
+        <div class="container mt-5">
+            
+            <div class="d-flex justify-content-between align-items-end mb-4">
+                <div>
+                    <h1 class="fw-bold mb-0 text-dark">SELECTOR DE <span class="text-warning border-bottom border-4 border-warning">LOBBIES</span></h1>
+                    <p class="text-muted mt-2">Encuentra una partida y demuestra quién es el mejor con las cartas.</p>
+                </div>
+                <div class="d-none d-md-flex gap-2">
+                    <button class="btn btn-primary fw-bold px-4 shadow-sm">Partida Random</button>
+                    <button class="btn btn-outline-dark fw-bold px-4 shadow-sm">Refrescar</button>
+                    <button class="btn btn-success fw-bold px-4 shadow-sm">Crear Lobby</button>
+                </div>
+            </div>
 
-            <section class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h2 class="h4 mb-3">Unirse a una partida</h2>
+            <div class="row g-2 bg-light p-3 rounded-4 mb-5 border shadow-sm">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control bg-white border-start-0" placeholder="Buscar por nombre o host...">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-white border w-100 shadow-sm">Filtrar</button>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-white border w-100 shadow-sm">Todos los modos</button>
+                </div>
+            </div>
 
+            <div class="card bg-white border mb-5 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-3 fw-bold text-uppercase text-muted">Unirse a partida privada</h2>
                     <form th:action="@{/lobbies/join}" method="post" class="row g-3">
-                        <div class="col-md-6">
-                            <label for="gameCode" class="form-label">Código de partida</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="gameCode"
-                                name="code"
-                                placeholder="Ej: ABC123"
-                                required>
+                        <div class="col-md-5">
+                            <input type="text" class="form-control bg-light border" name="code" placeholder="Código de partida (Ej: ABC123)" required>
                         </div>
-
-                        <div class="col-md-6">
-                            <label for="gamePassword" class="form-label">Contraseña</label>
-                            <input
-                                type="password"
-                                class="form-control"
-                                id="gamePassword"
-                                name="password"
-                                placeholder="Introduce la contraseña">
-                        </div>
-
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary">Unirse</button>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-warning w-100 fw-bold shadow-sm">UNIRSE</button>
                         </div>
                     </form>
                 </div>
-            </section>
+            </div>
 
-            <section class="card shadow-sm mb-5">
-                <div class="card-body">
-                    <h2 class="h4 mb-3">Partidas públicas</h2>
+            <h2 class="h4 mb-4 fw-bold text-dark">Partidas públicas</h2>
+            
+            <div class="row g-4">
+                <div th:each="lobby : ${publicLobbies}" class="col-md-6 col-lg-4 col-xl-3">
+                    <div class="card bg-white border h-100 rounded-4 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title fw-bold mb-0 text-truncate text-dark" th:text="${lobby.code}">ABC123</h5>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">ABIERTA</span>
+                            </div>
+                            <p class="small text-muted mb-4">Host: <span class="text-dark fw-semibold">Admin_Pro</span></p>
 
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th scope="col">Código de partida</th>
-                                    <th scope="col">Tipo de juego</th>
-                                    <th scope="col">Número de jugadores</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="lobby : ${publicLobbies}">
-                                    <td th:text="${lobby.code}">ABC123</td>
-                                    <td th:text="${lobby.gameType}">uno</td>
-                                    <td th:text="${lobby.playerCount}">3</td>
-                                </tr>
-                                <tr th:if="${publicLobbies == null || #lists.isEmpty(publicLobbies)}">
-                                    <td colspan="3" class="text-center text-muted">No hay partidas públicas disponibles.</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <div class="row g-2 mb-4">
+                                <div class="col-6">
+                                    <div class="bg-light p-2 rounded text-center border">
+                                        <small class="d-block text-muted" style="font-size: 0.65rem;">JUGADORES</small>
+                                        <span class="text-primary fw-bold" th:text="${lobby.playerCount + '/4'}">3/4</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="bg-light p-2 rounded text-center border">
+                                        <small class="d-block text-muted" style="font-size: 0.65rem;">MODO</small>
+                                        <span class="text-primary fw-bold text-uppercase" th:text="${lobby.gameType}">UNO</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <span class="badge bg-light text-dark border py-2 px-3 text-uppercase" th:text="${lobby.gameType}">CLÁSICO</span>
+                                <button class="btn btn-warning btn-sm fw-bold px-3 py-2 shadow-sm">UNIRSE</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </section>
+
+                <div th:if="${publicLobbies == null || #lists.isEmpty(publicLobbies)}" class="col-12 text-center">
+                    <div class="alert alert-light border text-muted py-5">
+                        No hay partidas públicas disponibles.
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
 </body>
-
 </html>
