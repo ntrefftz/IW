@@ -47,3 +47,17 @@
   * **application.properties** - contiene la configuración general de la aplicación. Ojo porque ciertas configuraciones se hacen en los ficheros `XyzConfig.java` vistos anteriormente. Por ejemplo, qué roles pueden acceder a qué rutas se configura desde `SecurityConfig.java`.
   * **import.sql** - contiene código SQL para inicializar la BBDD. La configuración inicial hace que la BBDD se borre y reinicialice a cada arranque, lo cual es útil para pruebas. Es posible cambiarla para que la BBDD persista entre arraques de la aplicación, y se ignore el `import.sql`.
     
+
+
+
+
+
+Proxima entrega, 26/03
+
+Desplegar en VM -> Go con BD
+50% funcionalidad -> La principal
+README -> Actualizar con: descripción/propuesta
+                          - img bd
+                          - Que estado en vistas
+
+                          
