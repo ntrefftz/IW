@@ -1,0 +1,592 @@
+/* =====================================================
+   FRENEMY — index.css
+   Tipografías gaming: Orbitron (títulos) + Rajdhani (cuerpo)
+   ===================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&display=swap');
+
+/* ===== VARIABLES GLOBALES ===== */
+:root {
+    --neon-blue:   #00e5ff;
+    --neon-purple: #bf5fff;
+    --dark-bg:     #0b0e14;
+    --glass-bg:    rgba(255, 255, 255, 0.04);
+    --text-main:   #f0f0f0;
+    --text-muted:  rgba(230, 230, 230, 0.72);
+    --border-neon: rgba(0, 229, 255, 0.28);
+}
+
+/* ===== RESET BASE ===== */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--text-main);
+    font-family: 'Rajdhani', sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+/* ===== FONDO CON TU IMAGEN ===== */
+/*
+   Coloca tu foto en: src/main/resources/static/img/index.jpg
+   Recomendación: imagen oscura/ambiente de noche, mesa de juego, luz neón.
+   El overlay radial la integra con el fondo oscuro automáticamente.
+*/
+.video-bg-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    background: url('../img/index2.jpg') no-repeat center center;
+    background-size: cover;
+}
+
+.video-bg-overlay {
+    position: absolute;
+    inset: 0;
+    /* Capa 1: oscurece y desatura la imagen fuertemente */
+    background:
+        linear-gradient(to bottom,
+            rgba(11, 14, 20, 0.82) 0%,
+            rgba(11, 14, 20, 0.70) 40%,
+            rgba(11, 14, 20, 0.88) 100%
+        );
+  
+}
+
+/* =====================================================
+   HERO SECTION
+   ===================================================== */
+.hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding-bottom: 80px; /* espacio para stats-bar */
+}
+
+/* Grid de líneas HUD */
+.hero-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(rgba(0, 210, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 210, 255, 0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+
+/* --- CARTAS UNO FLOTANTES --- */
+.cards-scene {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.uno-card {
+    position: absolute;
+    width: 70px;
+    height: 100px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    animation: floatCard linear infinite;
+    opacity: 0;
+    color: #fff;
+}
+
+/* Óvalo interior estilo carta UNO */
+.uno-card::before {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border-radius: 50% / 40%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+}
+
+.uno-card span {
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+    letter-spacing: -1px;
+}
+
+/* Colores por carta */
+.c1 { background: linear-gradient(135deg, #cc2200, #ff4422); top: 12%; left: 4%;  animation-duration: 14s; animation-delay: 0s;   transform: rotate(-12deg); }
+.c2 { background: linear-gradient(135deg, #0044cc, #2266ff); top: 62%; left: 6%;  animation-duration: 18s; animation-delay: 2s;   transform: rotate(8deg);  }
+.c3 { background: linear-gradient(135deg, #228800, #44bb00); top: 20%; right: 5%; animation-duration: 16s; animation-delay: 1s;   transform: rotate(15deg); }
+.c4 { background: linear-gradient(135deg, #cc8800, #ffaa00); top: 70%; right: 4%; animation-duration: 12s; animation-delay: 3s;   transform: rotate(-7deg); }
+.c5 {
+    background: linear-gradient(135deg, #330066, #660099);
+    top: 4%; left: 38%;
+    animation-duration: 20s; animation-delay: 0.5s;
+    transform: rotate(5deg);
+    font-size: 13px;
+    letter-spacing: -1px;
+}
+.c6 {
+    background: linear-gradient(135deg, #cc2200, #ff4422);
+    top: 82%; left: 32%;
+    animation-duration: 15s; animation-delay: 4s;
+    transform: rotate(-20deg);
+    width: 55px; height: 80px; font-size: 18px;
+}
+.c7 {
+    background: linear-gradient(135deg, #0044cc, #2266ff);
+    top: 8%; right: 22%;
+    animation-duration: 17s; animation-delay: 2.5s;
+    transform: rotate(22deg);
+    width: 55px; height: 80px; font-size: 14px;
+}
+
+@keyframes floatCard {
+    0%   { transform: translateY(0px)   rotate(var(--r, -12deg)); opacity: 0; }
+    10%  { opacity: 0.65; }
+    50%  { transform: translateY(-28px) rotate(calc(var(--r, -12deg) + 4deg)); opacity: 0.75; }
+    90%  { opacity: 0.65; }
+    100% { transform: translateY(0px)   rotate(var(--r, -12deg)); opacity: 0; }
+}
+
+/* --- PARTÍCULAS --- */
+#particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    bottom: -10px;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: rgba(0, 210, 255, 0.55);
+    animation: driftUp linear infinite;
+}
+
+@keyframes driftUp {
+    0%   { transform: translateY(0)      translateX(0);          opacity: 0; }
+    10%  { opacity: 0.8; }
+    90%  { opacity: 0.4; }
+    100% { transform: translateY(-105vh) translateX(var(--dx, 0px)); opacity: 0; }
+}
+
+/* --- CONTENIDO CENTRAL HERO --- */
+.hero-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    max-width: 760px;
+    padding: 2rem 1.5rem;
+    animation: fadeUp 0.9s ease both;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Badge superior */
+.badge-top {
+    display: inline-block;
+    background: rgba(0, 229, 255, 0.1);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    color: var(--neon-blue);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    padding: 7px 22px;
+    border-radius: 2px;
+    margin-bottom: 28px;
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+    box-shadow: 0 0 16px rgba(0, 229, 255, 0.15), inset 0 0 10px rgba(0, 229, 255, 0.05);
+    animation: fadeUp 0.9s ease 0.1s both;
+}
+
+/* Título principal */
+.hero-title {
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    font-weight: 900;
+    letter-spacing: 5px;
+    line-height: 1.05;
+    margin-bottom: 10px;
+    animation: fadeUp 0.9s ease 0.2s both;
+}
+
+.title-gradient {
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-blue));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 18px rgba(0, 229, 255, 0.6));
+    animation: shimmer 3.5s linear 1.2s infinite;
+}
+
+@keyframes shimmer {
+    0%   { background-position: 0%   center; }
+    100% { background-position: 200% center; }
+}
+
+/* Subtítulo */
+.hero-subtitle {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(0.85rem, 2vw, 1.1rem);
+    letter-spacing: 7px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    animation: fadeUp 0.9s ease 0.32s both;
+}
+
+/* Descripción */
+.hero-desc {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: var(--text-muted);
+    max-width: 560px;
+    margin: 0 auto 40px;
+    animation: fadeUp 0.9s ease 0.44s both;
+}
+
+/* Botones CTA */
+.cta-group {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp 0.9s ease 0.56s both;
+}
+
+.btn-primary,
+.btn-secondary {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 14px 38px;
+    border-radius: 3px;
+    text-decoration: none;
+    display: inline-block;
+    clip-path: polygon(0 0, 100% 0, 100% 72%, 91% 100%, 0 100%);
+    transition: filter 0.2s ease, transform 0.15s ease, background 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+    color: #fff;
+    border: none;
+}
+.btn-primary:hover  { filter: brightness(1.18); transform: translateY(-3px); color: #fff; }
+.btn-primary:active { transform: translateY(0); filter: brightness(1); }
+
+.btn-secondary {
+    background: transparent;
+    color: var(--neon-blue);
+    border: 1px solid rgba(0, 210, 255, 0.38);
+}
+.btn-secondary:hover  { background: rgba(0, 210, 255, 0.08); transform: translateY(-3px); color: var(--neon-blue); }
+.btn-secondary:active { transform: translateY(0); }
+
+/* --- STATS BAR --- */
+.stats-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(0, 0, 0, 0.55);
+    border-top: 1px solid rgba(0, 210, 255, 0.14);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 18px 40px;
+    display: flex;
+    justify-content: center;
+    gap: 64px;
+    z-index: 20;
+    animation: fadeUp 0.9s ease 0.7s both;
+}
+
+.stat-item { text-align: center; }
+
+.stat-num {
+    display: block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--neon-blue);
+    line-height: 1;
+    margin-bottom: 5px;
+    text-shadow: 0 0 14px rgba(0, 229, 255, 0.8);
+}
+
+.stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(224, 224, 224, 0.38);
+}
+
+/* --- SCROLL HINT --- */
+.scroll-hint {
+    position: absolute;
+    bottom: 88px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.35;
+    animation: fadeUp 1s ease 1.1s both;
+}
+
+.scroll-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    letter-spacing: 4px;
+    color: var(--neon-blue);
+    text-transform: uppercase;
+}
+
+.scroll-line {
+    width: 1px;
+    height: 38px;
+    background: linear-gradient(to bottom, var(--neon-blue), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+    0%, 100% { opacity: 0.35; }
+    50%       { opacity: 1; }
+}
+
+/* =====================================================
+   SECCIÓN: DESCRIPCIÓN
+   ===================================================== */
+.section-about {
+    padding: 80px 40px;
+    border-top: 1px solid rgba(0, 210, 255, 0.08);
+}
+
+.about-inner {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.about-text {
+    font-size: 1.1rem;
+    line-height: 1.85;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* =====================================================
+   SECCIÓN: ROLES
+   ===================================================== */
+.section-roles {
+    padding: 20px 40px 100px;
+}
+
+.roles-inner {
+    max-width: 1040px;
+    margin: 0 auto;
+}
+
+/* Labels de sección compartidos */
+.section-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 5px;
+    color: rgba(0, 210, 255, 0.55);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.section-title {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--text-main);
+    margin-bottom: 48px;
+}
+
+/* Grid de roles */
+.roles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+}
+
+/* Tarjeta de rol */
+.role-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--border-neon);
+    padding: 36px 28px 48px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease, background 0.3s ease;
+    cursor: default;
+    /* Corte de esquina estilo Sci-Fi */
+    clip-path: polygon(0 0, 100% 0, 100% 88%, 94% 100%, 0 100%);
+}
+
+.role-card:hover {
+    background: rgba(0, 210, 255, 0.04);
+    border-color: rgba(0, 210, 255, 0.38);
+}
+
+/* Línea de acento izquierda animada */
+.role-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: linear-gradient(to bottom, var(--neon-blue), var(--neon-purple));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.role-card:hover::before { opacity: 1; }
+
+/* Número decorativo */
+.role-icon {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: rgba(0, 210, 255, 0.18);
+    display: block;
+    line-height: 1;
+    margin-bottom: 18px;
+    transition: color 0.3s ease;
+}
+
+.role-card:hover .role-icon { color: rgba(0, 210, 255, 0.45); }
+
+/* Nombre del rol */
+.role-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--neon-blue);
+    display: block;
+    margin-bottom: 14px;
+    text-shadow: 0 0 12px rgba(0, 229, 255, 0.7);
+}
+
+/* Descripción del rol */
+.role-desc {
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* Mini carta decorativa en esquina */
+.card-corner {
+    position: absolute;
+    bottom: 18px; right: 18px;
+    width: 34px; height: 50px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.9);
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    opacity: 0.1;
+    transition: opacity 0.3s ease;
+}
+
+.role-card:hover .card-corner { opacity: 0.28; }
+
+.cc-admin { background: #990033; }
+.cc-host  { background: #004499; }
+.cc-play  { background: #006611; }
+
+/* =====================================================
+   TARJETAS HUD (compatibilidad con otras páginas)
+   ===================================================== */
+.hud-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--border-neon);
+    border-radius: 4px;
+    padding: 25px;
+    margin-top: 20px;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    clip-path: polygon(0 0, 100% 0, 100% 90%, 95% 100%, 0 100%);
+}
+
+.hud-card:hover {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 18px rgba(0, 210, 255, 0.14);
+}
+
+.role-title {
+    color: var(--neon-blue);
+    font-weight: bold;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+@media (max-width: 768px) {
+    .roles-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .stats-bar {
+        gap: 24px;
+        flex-wrap: wrap;
+        padding: 14px 20px;
+    }
+
+    .uno-card { display: none; } /* Ocultar cartas en móvil para rendimiento */
+
+    .section-roles,
+    .section-about { padding-left: 20px; padding-right: 20px; }
+
+    .hero-content { padding: 1.5rem 1rem; }
+
+    .cta-group { flex-direction: column; align-items: center; }
+
+    .btn-primary,
+    .btn-secondary { width: 100%; max-width: 280px; text-align: center; }
+}
+
+@media (max-width: 480px) {
+    .hero-title { letter-spacing: 2px; }
+    .stat-num   { font-size: 1.2rem; }
+    .stat-label { font-size: 0.58rem; }
+}

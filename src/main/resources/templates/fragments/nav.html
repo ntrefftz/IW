@@ -13,7 +13,7 @@
             <div class="container-fluid">
                 <!-- nombre del sitio; es un enlace que lleva a la página ppal -->
                 <a class="navbar-brand" th:href="@{/}" href="/">
-                    <img th:src="@{/img/logo.png}" src="/img/logo.png" alt="logo IW" width="32" height="32" class="d-inline-block align-text-top"> IW 2024-25
+                    <img th:src="@{/img/logo.jpg}" src="/img/logo.jpg" alt="logo IW" width="32" height="32" class="d-inline-block align-text-top"> FRENEMY
                 </a>
                 <!-- menu hamburguesa si no cabe todo -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,6 +51,7 @@
                                 <a class="nav-link" th:href="@{/about}" href="/about">Sobre el proyecto</a>
                             </li>
                             
+                            
                             <!--/*
                                 Esto es un comentario "thymeleaf" - no se verá en el HTML
                                 El bloque de "debug" sólo está activado si application.properties tiene debug a "true"
@@ -71,6 +72,7 @@
                                     <button type="submit" class="btn btn-outline-danger btn-sm">b</button>
                                 </form>
                             </li>
+
                         </th:block>
                     </ul>
                 </div>
