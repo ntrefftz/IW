@@ -37,9 +37,9 @@ public class RootController {
         return "index";
     }
 
-    @GetMapping("/authors")
-    public String authors(Model model) {
-        return "authors";
+    @GetMapping("/about")
+    public String about(Model model) {
+        return "about";
     }
     @GetMapping("/lobby")
     public String lobby(Model model) {

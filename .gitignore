@@ -4,6 +4,8 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+*.db
+*.zip
 
 ### STS ###
 .apt_generated
@@ -32,3 +34,5 @@ build/
 
 ### VS Code ###
 .vscode/
+
+

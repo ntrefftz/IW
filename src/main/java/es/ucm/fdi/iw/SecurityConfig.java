@@ -58,7 +58,7 @@ public class SecurityConfig {
 				.csrf(csrf -> csrf
 						.ignoringRequestMatchers("/api/**"))
 				.authorizeHttpRequests(authorize -> authorize
-						 .requestMatchers("/authors").permitAll() // <-- pagina de autores
+						 .requestMatchers("/about").permitAll() // <-- pagina de autores
 						// .requestMatchers("/lobby").permitAll() // <-- pagina de autores
 						// .requestMatchers("/game").permitAll() // <-- pagina de autores
 						// .requestMatchers("/profile").permitAll() // <-- pagina de autores
