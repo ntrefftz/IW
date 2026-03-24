@@ -5,6 +5,7 @@ import es.ucm.fdi.iw.model.User;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,6 +42,20 @@ public class LobbyService {
         return mockGames.stream()
                 .filter(g -> !g.isPrivado() && g.getEstado() == Game.Estado.LOBBY)
                 .collect(Collectors.toList());
+    }
+
+    public String createGame(User host) {
+        Game newGame = new Game();
+        String randomCode = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        
+        newGame.setCode(randomCode);
+        newGame.setHost(host);
+        newGame.setEstado(Game.Estado.LOBBY);
+        newGame.setPrivado(false);
+        newGame.getPlayers().add(host);
+        
+        mockGames.add(newGame);
+        return randomCode;
     }
 
     public void attemptJoin(String code, String password) throws LobbyException {

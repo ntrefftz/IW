@@ -2,6 +2,9 @@ package es.ucm.fdi.iw.controller;
 
 import es.ucm.fdi.iw.LobbyException;
 import es.ucm.fdi.iw.LobbyService;
+import es.ucm.fdi.iw.model.User;
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,6 +37,22 @@ public class LobbyController {
             return "redirect:/lobby-select";
         }
     }
+
+    @PostMapping("/lobbies/create")
+    public String createLobby(HttpSession session) {
+    
+    User creator = (User) session.getAttribute("u");
+    
+    // Si no hay usuario (caso de prueba), creamos uno genérico
+    if (creator == null) {
+        creator = new User();
+        creator.setUsername("Jugador_Nuevo");
+    }
+
+    String newCode = lobbyService.createGame(creator);
+    
+    return "redirect:/lobby?code=" + newCode;
+}
 
     @GetMapping("/lobby")
     public String showLobby() {
