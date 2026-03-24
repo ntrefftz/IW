@@ -49,14 +49,14 @@ public class Game implements Transferable<Game.Transfer> {
     
     private List<User> players = new ArrayList<>();
 
-    @Column(columnDefinition = "TEXT") // Esto va ha ser JSON
+    @Column(columnDefinition = "TEXT")
     private String estadoFinal; 
 
     private int mensaje;
 
     @ManyToOne
     @JoinColumn(name = "winner_id")
-    private User winner; // Clave foránea al Usuario ganador (opcional si es empate)
+    private User winner;
 
     @Getter
     @AllArgsConstructor
@@ -79,7 +79,7 @@ public class Game implements Transferable<Game.Transfer> {
     }
 
     @Override
-    public String toString() { // Para logs
+    public String toString() {
         return "Game{" +
                 "id=" + id +
                 ", code=" + code +
@@ -94,6 +94,6 @@ public class Game implements Transferable<Game.Transfer> {
     }
 
     public String getGameType() {
-        return "Clásico"; // O devolver un campo real si lo añades
+        return "Clásico";
     }
 }

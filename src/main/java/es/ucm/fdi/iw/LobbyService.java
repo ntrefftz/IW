@@ -13,11 +13,11 @@ public class LobbyService {
     private List<Game> mockGames = new ArrayList<>();
 
     public LobbyService() {
-        // Mock de usuario Host
+        
         User host = new User();
         host.setUsername("MasterCard99");
 
-        // Escenario Éxito: ABC123 [cite: 3, 4]
+        
         Game successGame = new Game();
         successGame.setCode("ABC123");
         successGame.setPrivado(false);
@@ -26,13 +26,13 @@ public class LobbyService {
         successGame.getPlayers().add(host);
         mockGames.add(successGame);
 
-        // Escenario Sala Llena: LLENA99 [cite: 6]
+        
         Game fullGame = new Game();
         fullGame.setCode("LLENA99");
         fullGame.setPrivado(false);
         fullGame.setHost(host);
         fullGame.setEstado(Game.Estado.LOBBY);
-        // Llenamos la sala con 4 usuarios (suponiendo que 4 es el máximo)
+        
         for (int i = 0; i < 4; i++) fullGame.getPlayers().add(new User());
         mockGames.add(fullGame);
     }

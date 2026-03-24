@@ -11,7 +11,11 @@
 
     <main class="flex-shrink-0">
         <div class="container mt-5">
-            
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span th:text="${error}">Mensaje de error</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
             <div class="d-flex justify-content-between align-items-end mb-4">
                 <div>
                     <h1 class="fw-bold mb-0 text-dark">SELECTOR DE <span class="text-warning border-bottom border-4 border-warning">LOBBIES</span></h1>
