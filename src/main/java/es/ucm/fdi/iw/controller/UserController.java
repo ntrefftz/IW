@@ -167,8 +167,6 @@ public class UserController {
       }
     }
     target.setUsername(edited.getUsername());
-    target.setFirstName(edited.getFirstName());
-    target.setLastName(edited.getLastName());
 
     // update user session so that changes are persisted in the session, too
     if (requester.getId() == target.getId()) {
@@ -249,33 +247,33 @@ public class UserController {
     return "error";
   }
 
-  /**
+  /** Por ahora lo comento pq los mensajes ahora van distinto
    * Returns JSON with all received messages
-   */
-  @GetMapping(path = "received", produces = "application/json")
-  @Transactional // para no recibir resultados inconsistentes
-  @ResponseBody // para indicar que no devuelve vista, sino un objeto (jsonizado)
-  public List<Message.Transfer> retrieveMessages(HttpSession session) {
-    long userId = ((User) session.getAttribute("u")).getId();
-    User u = entityManager.find(User.class, userId);
-    log.info("Generating message list for user {} ({} messages)",
-        u.getUsername(), u.getReceived().size());
-    return u.getReceived().stream().map(Transferable::toTransfer).collect(Collectors.toList());
-  }
+   */ 
+  // @GetMapping(path = "received", produces = "application/json")
+  // @Transactional // para no recibir resultados inconsistentes
+  // @ResponseBody // para indicar que no devuelve vista, sino un objeto (jsonizado)
+  // public List<Message.Transfer> retrieveMessages(HttpSession session) {
+  //   long userId = ((User) session.getAttribute("u")).getId();
+  //   User u = entityManager.find(User.class, userId);
+  //   log.info("Generating message list for user {} ({} messages)",
+  //       u.getUsername(), u.getReceived().size());
+  //   return u.getReceived().stream().map(Transferable::toTransfer).collect(Collectors.toList());
+  // }
 
   /**
    * Returns JSON with count of unread messages
    */
-  @GetMapping(path = "unread", produces = "application/json")
-  @ResponseBody
-  public String checkUnread(HttpSession session) {
-    long userId = ((User) session.getAttribute("u")).getId();
-    long unread = entityManager.createNamedQuery("Message.countUnread", Long.class)
-        .setParameter("userId", userId)
-        .getSingleResult();
-    session.setAttribute("unread", unread);
-    return "{\"unread\": " + unread + "}";
-  }
+  // @GetMapping(path = "unread", produces = "application/json")
+  // @ResponseBody
+  // public String checkUnread(HttpSession session) {
+  //   long userId = ((User) session.getAttribute("u")).getId();
+  //   long unread = entityManager.createNamedQuery("Message.countUnread", Long.class)
+  //       .setParameter("userId", userId)
+  //       .getSingleResult();
+  //   session.setAttribute("unread", unread);
+  //   return "{\"unread\": " + unread + "}";
+  // }
 
   /**
    * Posts a message to a user.
@@ -284,44 +282,44 @@ public class UserController {
    * @param o  JSON-ized message, similar to {"message": "text goes here"}
    * @throws JsonProcessingException
    */
-  @PostMapping("/{id}/msg")
-  @ResponseBody
-  @Transactional
-  public String postMsg(@PathVariable long id,
-      @RequestBody JsonNode o, Model model, HttpSession session)
-      throws JsonProcessingException {
+  // @PostMapping("/{id}/msg")
+  // @ResponseBody
+  // @Transactional
+  // public String postMsg(@PathVariable long id,
+  //     @RequestBody JsonNode o, Model model, HttpSession session)
+  //     throws JsonProcessingException {
 
-    String text = o.get("message").asText();
-    User u = entityManager.find(User.class, id);
-    User sender = entityManager.find(
-        User.class, ((User) session.getAttribute("u")).getId());
-    model.addAttribute("user", u);
+  //   String text = o.get("message").asText();
+  //   User u = entityManager.find(User.class, id);
+  //   User sender = entityManager.find(
+  //       User.class, ((User) session.getAttribute("u")).getId());
+  //   model.addAttribute("user", u);
 
-    // construye mensaje, lo guarda en BD
-    Message m = new Message();
-    m.setRecipient(u);
-    m.setSender(sender);
-    m.setDateSent(LocalDateTime.now());
-    m.setText(text);
-    entityManager.persist(m);
-    entityManager.flush(); // to get Id before commit
+  //   // construye mensaje, lo guarda en BD
+  //   Message m = new Message();
+  //   m.setRecipient(u);
+  //   m.setSender(sender);
+  //   m.setDateSent(LocalDateTime.now());
+  //   m.setText(text);
+  //   entityManager.persist(m);
+  //   entityManager.flush(); // to get Id before commit
 
-    ObjectMapper mapper = new ObjectMapper();
-    /*
-     * // construye json: método manual
-     * ObjectNode rootNode = mapper.createObjectNode();
-     * rootNode.put("from", sender.getUsername());
-     * rootNode.put("to", u.getUsername());
-     * rootNode.put("text", text);
-     * rootNode.put("id", m.getId());
-     * String json = mapper.writeValueAsString(rootNode);
-     */
-    // persiste objeto a json usando Jackson
-    String json = mapper.writeValueAsString(m.toTransfer());
+  //   ObjectMapper mapper = new ObjectMapper();
+  //   /*
+  //    * // construye json: método manual
+  //    * ObjectNode rootNode = mapper.createObjectNode();
+  //    * rootNode.put("from", sender.getUsername());
+  //    * rootNode.put("to", u.getUsername());
+  //    * rootNode.put("text", text);
+  //    * rootNode.put("id", m.getId());
+  //    * String json = mapper.writeValueAsString(rootNode);
+  //    */
+  //   // persiste objeto a json usando Jackson
+  //   String json = mapper.writeValueAsString(m.toTransfer());
 
-    log.info("Sending a message to {} with contents '{}'", id, json);
+  //   log.info("Sending a message to {} with contents '{}'", id, json);
 
-    messagingTemplate.convertAndSend("/user/" + u.getUsername() + "/queue/updates", json);
-    return "{\"result\": \"message sent.\"}";
-  }
+  //   messagingTemplate.convertAndSend("/user/" + u.getUsername() + "/queue/updates", json);
+  //   return "{\"result\": \"message sent.\"}";
+  // }
 }
