@@ -52,12 +52,15 @@ public class Game implements Transferable<Game.Transfer> {
     @Column(columnDefinition = "TEXT") // Esto va ha ser JSON
     private String estadoFinal; 
 
+    private int mensaje;
+
     @ManyToOne
     @JoinColumn(name = "winner_id")
     private User winner; // Clave foránea al Usuario ganador (opcional si es empate)
 
     @Getter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class Transfer {
         private long id;
         private String estadoFinal;
@@ -84,5 +87,13 @@ public class Game implements Transferable<Game.Transfer> {
                 ", estadoResumido='" + (estadoFinal != null && estadoFinal.length() > 50 ? 
                                         estadoFinal.substring(0, 47) + "..." : estadoFinal) + '\'' +
                 '}';
+    }
+
+    public int getPlayerCount() {
+        return this.players != null ? this.players.size() : 0;
+    }
+
+    public String getGameType() {
+        return "Clásico"; // O devolver un campo real si lo añades
     }
 }

@@ -41,10 +41,6 @@ public class RootController {
     public String about(Model model) {
         return "about";
     }
-    @GetMapping("/lobby")
-    public String lobby(Model model) {
-        return "lobby";
-    }
     @GetMapping("/game")
     public String game(Model model) {
         return "game";
@@ -52,9 +48,5 @@ public class RootController {
     @GetMapping("/profile")
     public String profile(Model model) {
         return "profile";
-    }
-    @GetMapping("/lobby-select")
-    public String lobby_select(Model model) {
-        return "lobby-select";
     }
 }

@@ -22,7 +22,6 @@ Feature: Lobbies UI
   Scenario: Unirse a una partida existente correctamente
     Given driver baseUrl + '/lobby-select'
     And input('#gameCode', 'ABC123')
-    And input('#gamePassword', 'secreta')
     # Hacemos click en el botón que tiene el texto "Unirse"
     When submit().click("{button}Unirse")
     # Si todo va bien, el backend nos debería redirigir a la sala de espera
@@ -32,7 +31,6 @@ Feature: Lobbies UI
   Scenario: Fallo al unirse a un lobby (ej. código incorrecto o contraseña mala)
     Given driver baseUrl + '/lobby-select'
     And input('#gameCode', 'FALSO1')
-    And input('#gamePassword', 'mal')
     When submit().click("{button}Unirse")
     # Asumiendo que el backend recarga la página de selección si hay error
     Then waitForUrl(baseUrl + '/lobby-select')
