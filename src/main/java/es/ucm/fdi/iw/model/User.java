@@ -43,7 +43,7 @@ public class User implements Transferable<User.Transfer> {
   private String password;
   private boolean enabled;
   private String roles; // split by ',' to separate roles
-
+  
   private int numVictorias;
   private int numDerrotas;
   

@@ -247,7 +247,7 @@ public class UserController {
     return "error";
   }
 
-  /** Por ahora lo comento pq los mensajes ahora van distinto
+  /** Por ahora lo comento pq los
    * Returns JSON with all received messages
    */ 
   // @GetMapping(path = "received", produces = "application/json")
