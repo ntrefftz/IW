@@ -59,6 +59,7 @@ public class SecurityConfig {
 						.ignoringRequestMatchers("/api/**"))
 				.authorizeHttpRequests(authorize -> authorize
 						 .requestMatchers("/about").permitAll() // <-- pagina de autores
+						 .requestMatchers("/register").permitAll()
 						// .requestMatchers("/lobby").permitAll() // <-- pagina de autores
 						// .requestMatchers("/game").permitAll() // <-- pagina de autores
 						// .requestMatchers("/profile").permitAll() // <-- pagina de autores

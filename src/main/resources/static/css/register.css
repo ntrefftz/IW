@@ -1,0 +1,26 @@
+/* Ajuste para el texto del encabezado en la página de registro */
+.register-form .form-signin-heading::before {
+    content: '// REGISTRO DE USUARIO';
+}
+
+/* Estilo para el ID de sistema en la parte inferior (opcional cambiarlo) */
+.register-form::after {
+    content: 'SYS-REG-02';
+}
+
+/* Estilo para el enlace de "Volver al login" */
+.login-link {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    text-decoration: none;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.login-link:hover {
+    opacity: 1;
+    color: #cc0000;
+}

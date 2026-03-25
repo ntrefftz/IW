@@ -6,6 +6,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -49,4 +51,35 @@ public class RootController {
     public String profile(Model model) {
         return "profile";
     }
+
+    @GetMapping("/register")
+    public String register(Model model) {
+        return "register";
+    }
+
+    @PostMapping("/register")
+    public String registerUser(
+            @RequestParam String username, 
+            @RequestParam String password, 
+            @RequestParam String confirmPassword, 
+            Model model) {
+
+        // seria mas comodo para el usuario que esto tb se comprobase en frontend, pero con esto basta :P
+        if (!password.equals(confirmPassword)) {
+            model.addAttribute("error", "Las contraseñas no coinciden.");
+            return "register";
+        }
+
+        try {
+            //TODO Aqui la creacion del usuario, creo que hay q usar los @NamedQueries, no se si hay un DAO que lo gestiona, mirare los apuntes
+            
+            
+            return "redirect:/login?success"; 
+        } catch (Exception e) {
+            // 3. Manejo de errores (ej. el usuario ya existe)
+            model.addAttribute("error", "El nombre de usuario ya está en uso o algo más ha ido mal.");
+            return "register";
+        }
+    }
 }
+

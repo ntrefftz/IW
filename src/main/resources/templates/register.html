@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html class="h-100" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: header}" />
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+    <title>IW: Registro</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+    <header th:replace="~{fragments/nav.html :: nav}"></header>
+
+    <main class="flex-shrink-0">
+        <div class="container">
+            <form class="form-signin register-form" method="post" th:action="@{/register}">
+                <h2 class="form-signin-heading">Crear cuenta</h2>
+
+                <p th:if="${error != null}" class="error" th:text="${error}">
+                    Error en el registro
+                </p>
+
+                <p>
+                    <label for="username" class="visually-hidden">Usuario</label>
+                    <input type="text" id="username" name="username" class="form-control" 
+                           placeholder="Usuario" required="required" autofocus>
+                </p>
+                <p>
+                    <label for="password" class="visually-hidden">Contraseña</label>
+                    <input type="password" id="password" name="password" class="form-control" 
+                           placeholder="Contraseña" required="required">
+                </p>
+                <p>
+                    <label for="confirmPassword" class="visually-hidden">Repetir contraseña</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" 
+                           placeholder="Repetir contraseña" required="required">
+                </p>
+
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Registrar</button>
+                
+                <div class="mt-3 text-center">
+                    <a th:href="@{/login}" class="login-link">Ya tienes una cuenta? Login</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <th:block th:replace="~{fragments/footer.html :: footer}" />
+</body>
+
+</html>
