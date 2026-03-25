@@ -2,6 +2,7 @@ package es.ucm.fdi.iw.controller;
 
 import es.ucm.fdi.iw.LobbyException;
 import es.ucm.fdi.iw.LobbyService;
+import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.User;
 import jakarta.servlet.http.HttpSession;
 
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 public class LobbyController {
@@ -28,10 +31,13 @@ public class LobbyController {
     @PostMapping("/lobbies/join")
     public String joinLobby(@RequestParam String code, 
                             @RequestParam(required = false) String password, 
+                            HttpSession session,
                             RedirectAttributes ra) {
         try {
-            lobbyService.attemptJoin(code, password);
-            return "redirect:/lobby"; 
+            User user = (User) session.getAttribute("u");
+            lobbyService.attemptJoin(code, password, user);
+            session.setAttribute("currentLobbyCode", code);
+            return "redirect:/lobby?code=" + code;
         } catch (LobbyException e) {
             ra.addFlashAttribute("error", e.getMessage());
             return "redirect:/lobby-select";
@@ -50,12 +56,100 @@ public class LobbyController {
     }
 
     String newCode = lobbyService.createGame(creator);
+    session.setAttribute("currentLobbyCode", newCode);
     
     return "redirect:/lobby?code=" + newCode;
 }
 
     @GetMapping("/lobby")
-    public String showLobby() {
+    public String showLobby(@RequestParam(required = false) String code,
+                            HttpSession session,
+                            Model model,
+                            RedirectAttributes ra) {
+        String lobbyCode = code != null ? code : (String) session.getAttribute("currentLobbyCode");
+
+        if (lobbyCode == null || lobbyCode.isBlank()) {
+            ra.addFlashAttribute("error", "No hay lobby seleccionado");
+            return "redirect:/lobby-select";
+        }
+
+        try {
+            Game lobby = lobbyService.getLobbyByCode(lobbyCode);
+            User currentUser = (User) session.getAttribute("u");
+            boolean isOwner = lobbyService.isOwner(lobby, currentUser);
+
+            List<User> players = lobby.getPlayers().stream().limit(4).toList();
+
+            model.addAttribute("lobby", lobby);
+            model.addAttribute("players", players);
+            model.addAttribute("isOwner", isOwner);
+            model.addAttribute("maxPlayers", 4);
+            session.setAttribute("currentLobbyCode", lobbyCode);
+        } catch (LobbyException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/lobby-select";
+        }
+
         return "lobby";
+    }
+
+    @PostMapping("/lobby/settings")
+    public String updateSettings(@RequestParam String code,
+                                 @RequestParam String modalidad,
+                                 @RequestParam boolean privado,
+                                 HttpSession session,
+                                 RedirectAttributes ra) {
+        try {
+            User currentUser = (User) session.getAttribute("u");
+            lobbyService.updateLobbySettings(code, currentUser, modalidad, privado);
+            return "redirect:/lobby?code=" + code;
+        } catch (LobbyException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/lobby?code=" + code;
+        }
+    }
+
+    @PostMapping("/lobby/leave")
+    public String leaveLobby(@RequestParam String code,
+                             HttpSession session,
+                             RedirectAttributes ra) {
+        try {
+            User currentUser = (User) session.getAttribute("u");
+            lobbyService.leaveLobby(code, currentUser);
+            session.removeAttribute("currentLobbyCode");
+            return "redirect:/lobby-select";
+        } catch (LobbyException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/lobby?code=" + code;
+        }
+    }
+
+    @PostMapping("/lobby/close")
+    public String closeLobby(@RequestParam String code,
+                             HttpSession session,
+                             RedirectAttributes ra) {
+        try {
+            User currentUser = (User) session.getAttribute("u");
+            lobbyService.closeLobby(code, currentUser);
+            session.removeAttribute("currentLobbyCode");
+            return "redirect:/lobby-select";
+        } catch (LobbyException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/lobby?code=" + code;
+        }
+    }
+
+    @PostMapping("/lobby/start")
+    public String startLobby(@RequestParam String code,
+                             HttpSession session,
+                             RedirectAttributes ra) {
+        try {
+            User currentUser = (User) session.getAttribute("u");
+            lobbyService.startLobby(code, currentUser);
+            return "redirect:/game";
+        } catch (LobbyException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/lobby?code=" + code;
+        }
     }
 }

@@ -5,10 +5,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-
-import es.ucm.fdi.iw.model.Transferable;
-import es.ucm.fdi.iw.model.User;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +28,7 @@ public class Game implements Transferable<Game.Transfer> {
 
     @Column(nullable = false, unique = true)
     private String code;
+    private String modalidad = "UNO";
     private boolean privado;
     private String password;
     private Estado estado;
@@ -94,6 +91,6 @@ public class Game implements Transferable<Game.Transfer> {
     }
 
     public String getGameType() {
-        return "Clásico";
+        return modalidad != null ? modalidad : "UNO";
     }
 }
