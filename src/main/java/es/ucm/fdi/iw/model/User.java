@@ -22,7 +22,7 @@ import java.util.List;
         + "WHERE u.username = :username AND u.enabled = TRUE"),
     @NamedQuery(name = "User.hasUsername", query = "SELECT COUNT(u) "
         + "FROM User u "
-        + "WHERE u.username = :username"),
+        + "WHERE u.username = :username")
 })
 @Table(name = "IWUser")
 public class User implements Transferable<User.Transfer> {

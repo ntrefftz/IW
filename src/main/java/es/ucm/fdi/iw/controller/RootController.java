@@ -2,6 +2,8 @@ package es.ucm.fdi.iw.controller;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,16 +11,28 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
+import es.ucm.fdi.iw.model.User;
 
 /**
  * Non-authenticated requests only.
  */
+
 @Controller
 public class RootController {
 
     private static final Logger log = LogManager.getLogger(RootController.class);
+
+    //Acceso a la DB
+    @Autowired
+    private EntityManager entityManager;
+
+    //Hasheador de contraseñas 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @ModelAttribute
     public void populateModel(HttpSession session, Model model) {
@@ -58,6 +72,7 @@ public class RootController {
     }
 
     @PostMapping("/register")
+    @Transactional
     public String registerUser(
             @RequestParam String username, 
             @RequestParam String password, 
@@ -71,13 +86,26 @@ public class RootController {
         }
 
         try {
-            //TODO Aqui la creacion del usuario, creo que hay q usar los @NamedQueries, no se si hay un DAO que lo gestiona, mirare los apuntes
-            
-            
-            return "redirect:/login?success"; 
+            User u = new User();
+            //nº de usuarios con mismo nombre. Si intento persisitr el usuario sin comprobarlo me lanza un error incapturable
+            long n = entityManager.createNamedQuery("User.hasUsername", Long.class)
+                    .setParameter("username", username)
+                    .getSingleResult(); 
+            if (n > 0) {
+                model.addAttribute("error", "El nombre de usuario '" + username + "' ya está en uso.");
+                return "register";
+            }
+            u.setEnabled(true);
+            u.setNumDerrotas(0);
+            u.setNumVictorias(0);
+            u.setRoles("USER");
+            u.setPassword(passwordEncoder.encode(password));
+            u.setUsername(username);
+            entityManager.persist(u);
+
+            return "redirect:/login"; 
         } catch (Exception e) {
-            // 3. Manejo de errores (ej. el usuario ya existe)
-            model.addAttribute("error", "El nombre de usuario ya está en uso o algo más ha ido mal.");
+            model.addAttribute("error", "Error interno del servidor, contacte con un administrador." );
             return "register";
         }
     }
