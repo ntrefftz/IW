@@ -14,49 +14,41 @@
 
     <header th:replace="~{fragments/nav.html :: nav}"></header>
 
-    <main class="flex-shrink-0">
+    <main class="flex-grow-1 d-flex align-items-center">
         <div class="container py-5">
             <div class="text-center mb-5">
                 <h1 class="mt-5 title-gradient display-4">Bienvenid@ a Frenemy</h1>
                 <h2 class="h4 opacity-75"> (Friends to Enemies)</h2>
+
+
             </div>
-
             <div class="row justify-content-center">
-                <div class="col-lg-10">
-                    <div class="hud-card mb-4">
-                        <h3 class="h5 text-info">¿Quieres poner a prueba tu amistad con tus amigos?</h3>
-                        <p class="lead" style="font-size: 1.1rem; line-height: 1.8;">
-                            Frenemy es la aplicación perfecta para evaluar vuestro nivel de amistad, poniéndote a ti y a tus amigos a
-                            prueba con distintos minijuegos, como juegos de cartas donde tendréis que torpedearos los unos a los
-                            otros para alcanzar la victoria, sin mostrar ningún tipo de piedad por tus, “amigos”... ¿Sobrevivirá
-                            vuestra amistad a nuestros juegos? ¿Seréis capaces de afrontar este desafío? ¿O tendréis que buscar
-                            nuevas amistades? Descubrirlo en Frenemy.
-                        </p>
-                    </div>
 
-                    <div class="hud-card">
-                        <h3 class="h5 text-info mb-4">¿Qué usuarios tendrá Frenemy y a que se dedicarán?</h3>
-                        
-                        <div class="row">
-                            <div class="col-md-4 mb-3 border-start border-info border-2">
-                                <span class="role-title">Administrador</span>
-                                <p class="small">Podrá modificar, añadir o eliminar juegos a la lista de juegos disponibles, y gestionar los usuarios.</p>
-                            </div>
-                            <div class="col-md-4 mb-3 border-start border-info border-2">
-                                <span class="role-title">Host</span>
-                                <p class="small">Usuario normal, que creará la sala, seleccionará entre los juegos disponibles y gestiona el orden de juego y número de jugadores.</p>
-                            </div>
-                            <div class="col-md-4 mb-3 border-start border-info border-2">
-                                <span class="role-title">Jugador</span>
-                                <p class="small">Participa en los distintos juegos, uniéndose a un Host, y jugando con otros jugadores, pudiendo consultar su afinidad y resultados.</p>
-                            </div>
+                <!-- Si el usuario ya ha iniciado sesión, mostramos menu con opciones -->
+                <th:block th:if="${u}">
+                    <div class="col-12">
+                        <div class="cta-group">
+                            <a th:href="@{/lobby-select}" class="btn-primary">Ver lobbys disponibles</a>
+                            <a th:href="@{/profile}" class="btn-secondary">Ver mi perfil</a>
+                            <a th:if="${u.hasRole('ADMIN')}" th:href="@{/admin/}" class="btn-secondary">Administración</a>
                         </div>
                     </div>
-                </div>
+                </th:block>
+                <!-- Si no ha iniciado sesión, login y register-->
+                <th:block th:unless="${u}">
+                    <div class="col-12">
+                        <div class="cta-group">
+                            <a th:href="@{/login}" class="btn-primary">Login</a>
+                            <a th:href="@{/register}" class="btn-secondary">Register</a>
+                        </div>
+                    </div>
+
+                </th:block>
             </div>
         </div>
     </main>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
 </body>
+
 </html>
