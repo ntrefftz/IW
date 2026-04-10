@@ -65,6 +65,14 @@ public class Game implements Transferable<Game.Transfer> {
         private String winnerName;
     }
 
+    @Transient // Esto no se guarda en la BD
+    private UnoState unoState;
+
+// Método para verificar si la partida tiene lógica activa
+    public void initUno() {
+        this.unoState = new UnoState(this.players);
+    }
+
     @Override
     public Transfer toTransfer() {
         return new Transfer(

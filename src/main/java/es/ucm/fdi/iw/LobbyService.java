@@ -18,7 +18,6 @@ public class LobbyService {
         User host = new User();
         host.setUsername("MasterCard99");
 
-        
         Game successGame = new Game();
         successGame.setCode("ABC123");
         successGame.setPrivado(false);

@@ -29,6 +29,12 @@ public class LobbyController {
 
     @Autowired
     private LobbyService lobbyService;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private UnoService unoService;
 
     @GetMapping("/lobby-select")
     public String showSelector(Model model) {
@@ -148,13 +154,37 @@ public class LobbyController {
     }
 
     @PostMapping("/lobby/start")
-    public String startLobby(@RequestParam String code,
-                             HttpSession session,
-                             RedirectAttributes ra) {
+    @Transactional
+    public String startLobby(@RequestParam String code, HttpSession session, RedirectAttributes ra) {
         try {
             User currentUser = (User) session.getAttribute("u");
+            Game game = lobbyService.getLobbyByCode(code);
+
+            //Validaciones y cambio de estado a PARTIDA
             lobbyService.startLobby(code, currentUser);
-            return "redirect:/game";
+
+            //Usamos el nuevo servicio para "montar el tablero"
+            unoService.prepareGame(game);
+
+            for (User p : game.getPlayers()) {
+                // Generamos un JSON único para este usuario (sus cartas visibles, oponentes ocultos)
+                ObjectNode view = unoService.generatePlayerView(game, p, objectMapper);
+                
+                // Enviamos el JSON privado. Spring busca la sesión WebSocket de ese username.
+                messagingTemplate.convertAndSendToUser(
+                    p.getUsername(), 
+                    "/queue/updates", 
+                    view
+                );
+            }
+
+            //Notificamos por WebSocket (JSON) a todos
+            ObjectNode msg = objectMapper.createObjectNode();
+            msg.put("type", "GAME_START");
+            msg.put("code", code);
+            messagingTemplate.convertAndSend("/topic/lobby/" + code, msg);
+
+            return "redirect:/game?code=" + code;
         } catch (LobbyException e) {
             ra.addFlashAttribute("error", e.getMessage());
             return "redirect:/lobby?code=" + code;
