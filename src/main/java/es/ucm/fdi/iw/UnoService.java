@@ -67,7 +67,7 @@ public class UnoService {
         
         return deck;
     }
-}
+
 
 public ObjectNode generatePlayerView(Game game, User viewer, ObjectMapper mapper) { // !!!!
     UnoState state = game.getUnoState();
@@ -102,4 +102,5 @@ public ObjectNode generatePlayerView(Game game, User viewer, ObjectMapper mapper
     });
 
     return root;
+}
 }
