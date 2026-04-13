@@ -10,11 +10,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
+import es.ucm.fdi.iw.LobbyException;
+import es.ucm.fdi.iw.LobbyService;
+import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.User;
 
 /**
@@ -33,6 +37,9 @@ public class RootController {
     //Hasheador de contraseñas 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private LobbyService lobbyService;
 
     @ModelAttribute
     public void populateModel(HttpSession session, Model model) {
@@ -58,8 +65,25 @@ public class RootController {
         return "about";
     }
     @GetMapping("/game")
-    public String game(Model model) {
-        return "game";
+    public String game(@RequestParam(required = false) String code,
+            HttpSession session,
+            Model model,
+            RedirectAttributes ra) {
+        String lobbyCode = code != null ? code : (String) session.getAttribute("currentLobbyCode");
+        if (lobbyCode == null || lobbyCode.isBlank()) {
+            ra.addFlashAttribute("error", "No hay partida activa");
+            return "redirect:/lobby-select";
+        }
+
+        try {
+            Game game = lobbyService.getLobbyByCode(lobbyCode);
+            model.addAttribute("lobbyCode", lobbyCode);
+            model.addAttribute("playerNames", game.getPlayers().stream().map(User::getUsername).toList());
+            return "game";
+        } catch (LobbyException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/lobby-select";
+        }
     }
     @GetMapping("/profile")
     public String profile(Model model) {

@@ -20,18 +20,20 @@
             V: "#198754",
             A: "#0d6efd",
             Y: "#ffc107",
-            W: "#343a40"
+            W: "#343a40",
+            X: "#6c757d"
         }
     };
 
-    const PLAYER_INDEX = 0;
-
     const state = {
-        mazos: [],
-        robo: [],
-        jugadas: [],
+        code: (window.initialUnoState && window.initialUnoState.lobbyCode) || "",
+        yourHand: [],
+        opponentCounts: [0, 0, 0],
+        topCardCode: "R0",
+        drawPileCount: 0,
         turno: 0,
-        sentido: 1
+        sentido: 1,
+        loading: false
     };
 
     function setMessage(msg) {
@@ -44,7 +46,6 @@
         if (typeof code !== "string" || code.length < 2) {
             return { suit: "W", text: "?" };
         }
-
         return {
             suit: code[0].toUpperCase(),
             text: code.slice(1) || "?"
@@ -54,26 +55,10 @@
     function isPlayable(cardCode, topCardCode) {
         const card = parseCard(cardCode);
         const top = parseCard(topCardCode || "R0");
-
         if (card.suit === "W") {
             return true;
         }
-
         return card.suit === top.suit || card.text === top.text;
-    }
-
-    function ensureDeck() {
-        if (state.robo.length > 0) {
-            return;
-        }
-
-        if (state.jugadas.length <= 1) {
-            return;
-        }
-
-        const top = state.jugadas.pop();
-        state.robo = state.jugadas.splice(0);
-        state.jugadas = [top];
     }
 
     function drawLabel(x, y, text, bold = false) {
@@ -105,7 +90,7 @@
 
     function drawBackCard(container, x, y, id, clickable = false, onClick = null) {
         container.insertAdjacentHTML("beforeend", `
-            <g id="${id}" style="cursor:${clickable ? "pointer" : "default"};">
+            <g id="${id}" style="cursor:${clickable ? "pointer" : "default"}; opacity:${clickable ? "1" : "0.95"};">
                 <rect x="${x}" y="${y}" width="${cc.w}" height="${cc.h}" rx="${cc.r}" ry="${cc.r}" fill="#d11f30"/>
                 <rect x="${x + 8}" y="${y + 8}" width="${cc.w - 16}" height="${cc.h - 16}" rx="${cc.r - 2}" ry="${cc.r - 2}" fill="#1f2937"/>
                 <text x="${x + cc.w / 2}" y="${y + cc.h / 2 + 8}" font-size="18" font-weight="bold" font-family="Arial" text-anchor="middle" fill="#fff">UNO</text>
@@ -121,19 +106,33 @@
     }
 
     function drawOpponent(playerIndex) {
-        const hand = state.mazos[playerIndex];
-        if (!Array.isArray(hand)) {
-            return;
-        }
-
+        const count = state.opponentCounts[playerIndex - 1] || 0;
         const y = 48 + (playerIndex - 1) * 122;
         const x = 90 + (playerIndex - 1) * 285;
-        drawLabel(x, y - 12, `Jugador ${playerIndex + 1} (${hand.length} cartas)`, state.turno === playerIndex);
+        drawLabel(x, y - 12, `Jugador ${playerIndex + 1} (${count} cartas)`, state.turno === playerIndex);
 
-        const visibleBacks = Math.min(7, hand.length);
+        const visibleBacks = Math.min(7, count);
         for (let i = 0; i < visibleBacks; i += 1) {
             drawBackCard(svg, x + i * 18, y, `op-${playerIndex}-${i}`);
         }
+    }
+
+    function chooseColorIfNeeded(cardCode) {
+        if (!cardCode.startsWith("W")) {
+            return null;
+        }
+
+        const response = window.prompt("Elige color: RED, GREEN, BLUE, YELLOW", "RED");
+        if (!response) {
+            return null;
+        }
+
+        const c = response.trim().toUpperCase();
+        if (["RED", "GREEN", "BLUE", "YELLOW"].includes(c)) {
+            return c;
+        }
+        setMessage("Color no valido. Usa RED, GREEN, BLUE o YELLOW.");
+        return undefined;
     }
 
     function drawPiles() {
@@ -141,112 +140,162 @@
         const y = cc.boardCenterY - 30;
         const discardX = cc.boardCenterX + 30;
 
-        drawLabel(drawX, y - 14, `Mazo (${state.robo.length})`, true);
-        drawBackCard(svg, drawX, y, "draw-pile", state.turno === PLAYER_INDEX, () => {
-            if (state.turno !== PLAYER_INDEX) {
-                return;
-            }
-            ensureDeck();
-            if (state.robo.length === 0) {
-                setMessage("No quedan cartas para robar.");
-                return;
-            }
-
-            const card = state.robo.pop();
-            state.mazos[PLAYER_INDEX].push(card);
-            setMessage(`Robas ${card}.`);
-            render();
+        drawLabel(drawX, y - 14, `Mazo (${state.drawPileCount})`, true);
+        drawBackCard(svg, drawX, y, "draw-pile", state.turno === 0 && !state.loading, () => {
+            sendAction({ actionType: "DRAW_CARD" });
         });
 
         drawLabel(discardX, y - 14, "Descarte", true);
-        const top = state.jugadas[state.jugadas.length - 1] || "R0";
-        drawFrontCard(svg, discardX, y, top, "discard-top");
-    }
-
-    function maybeBotTurns() {
-        while (state.turno !== PLAYER_INDEX) {
-            const hand = state.mazos[state.turno] || [];
-            const top = state.jugadas[state.jugadas.length - 1];
-            const playableIndex = hand.findIndex(c => isPlayable(c, top));
-
-            if (playableIndex >= 0) {
-                const played = hand.splice(playableIndex, 1)[0];
-                state.jugadas.push(played);
-            } else {
-                ensureDeck();
-                if (state.robo.length > 0) {
-                    hand.push(state.robo.pop());
-                }
-            }
-
-            state.turno = (state.turno + 1) % state.mazos.length;
-        }
+        drawFrontCard(svg, discardX, y, state.topCardCode || "R0", "discard-top");
     }
 
     function drawPlayerHand() {
-        const hand = state.mazos[PLAYER_INDEX] || [];
+        const hand = state.yourHand || [];
         const y = 560;
         const x0 = 95;
 
         drawLabel(x0, y - 16, `Tu mano (${hand.length} cartas)`, true);
 
-        const top = state.jugadas[state.jugadas.length - 1];
-
-        hand.forEach((cardCode, index) => {
+        hand.forEach((card, index) => {
             const x = x0 + index * cc.handGap;
-            const playable = state.turno === PLAYER_INDEX && isPlayable(cardCode, top);
+            const playable = state.turno === 0 && !state.loading && isPlayable(card.code, state.topCardCode);
 
-            drawFrontCard(svg, x, y, cardCode, `my-${index}`, {
+            drawFrontCard(svg, x, y, card.code, `my-${index}`, {
                 clickable: playable,
                 dimmed: !playable,
                 onClick: () => {
-                    const played = hand.splice(index, 1)[0];
-                    state.jugadas.push(played);
-
-                    if (hand.length === 0) {
-                        setMessage("Has ganado la ronda.");
-                        render();
+                    const chosenColor = chooseColorIfNeeded(card.code);
+                    if (chosenColor === undefined) {
                         return;
                     }
-
-                    state.turno = (state.turno + 1) % state.mazos.length;
-                    maybeBotTurns();
-                    setMessage(`Juegas ${played}.`);
-                    render();
+                    const payload = {
+                        actionType: "PLAY_CARD",
+                        cardId: card.id
+                    };
+                    if (chosenColor) {
+                        payload.chosenColor = chosenColor;
+                    }
+                    sendAction(payload);
                 }
             });
         });
     }
 
-    function normalizeInput(input) {
-        const incoming = input || {};
-        const mazos = Array.isArray(incoming.mazos)
-            ? incoming.mazos.map(m => Array.isArray(m) ? [...m] : [])
-            : [];
+    function normalizeFromServer(update) {
+        const incoming = update || {};
+        const hand = Array.isArray(incoming.yourHand) ? incoming.yourHand : [];
 
-        while (mazos.length < 4) {
-            mazos.push([]);
+        const normalizedHand = hand.map(c => ({
+            id: c.id,
+            code: c.code
+        }));
+
+        const counts = Array.isArray(incoming.opponentCounts) ? [...incoming.opponentCounts] : [];
+        while (counts.length < 3) {
+            counts.push(0);
         }
 
         return {
-            mazos,
-            robo: Array.isArray(incoming.robo) ? [...incoming.robo] : ["Y9", "A2", "V0", "R7", "Y8", "A9", "V+2", "R6", "Y0", "A6"],
-            jugadas: Array.isArray(incoming.jugadas) && incoming.jugadas.length > 0 ? [...incoming.jugadas] : ["R3"],
+            yourHand: normalizedHand,
+            opponentCounts: counts,
+            topCardCode: incoming.topCardCode || "R0",
+            drawPileCount: Number.isInteger(incoming.drawPileCount) ? incoming.drawPileCount : 0,
             turno: Number.isInteger(incoming.turno) ? incoming.turno : 0,
             sentido: incoming.sentido === -1 ? -1 : 1
         };
     }
 
-    function repinta(gameState) {
-        const normalized = normalizeInput(gameState);
-        state.mazos = normalized.mazos;
-        state.robo = normalized.robo;
-        state.jugadas = normalized.jugadas;
+    function applyServerState(update) {
+        const normalized = normalizeFromServer(update);
+        state.yourHand = normalized.yourHand;
+        state.opponentCounts = normalized.opponentCounts;
+        state.topCardCode = normalized.topCardCode;
+        state.drawPileCount = normalized.drawPileCount;
         state.turno = normalized.turno;
         state.sentido = normalized.sentido;
-
-        maybeBotTurns();
+        state.loading = false;
         render();
+    }
+
+    function onWsMessage(message) {
+        if (!message || !message.type) {
+            return;
+        }
+        if (state.code && message.code && message.code !== state.code) {
+            return;
+        }
+
+        if (message.type === "GAME_STATE_UPDATE") {
+            applyServerState(message);
+            return;
+        }
+
+        if (message.type === "ACTION_REJECTED") {
+            state.loading = false;
+            setMessage(message.message || "Accion rechazada");
+            return;
+        }
+
+        if (message.type === "GAME_START") {
+            setMessage("Partida iniciada. Esperando estado inicial...");
+        }
+    }
+
+    function setupWsHook() {
+        if (!window.ws || typeof window.ws.receive !== "function") {
+            return;
+        }
+
+        const oldReceive = window.ws.receive;
+        window.ws.receive = (m) => {
+            oldReceive(m);
+            onWsMessage(m);
+        };
+    }
+
+    function sendAction(actionPayload) {
+        if (!state.code || state.loading) {
+            return;
+        }
+
+        state.loading = true;
+        setMessage("Enviando accion...");
+
+        go(`${config.rootUrl}/api/games/${state.code}/action`, "POST", actionPayload)
+            .then((response) => {
+                if (response.type === "GAME_STATE_UPDATE") {
+                    applyServerState(response);
+                    setMessage("Accion aplicada.");
+                } else if (response.type === "ACTION_REJECTED") {
+                    state.loading = false;
+                    setMessage(response.message || "Accion rechazada");
+                }
+            })
+            .catch((e) => {
+                state.loading = false;
+                setMessage(`Error al enviar accion: ${e.text || e.status || "desconocido"}`);
+            });
+    }
+
+    function loadInitialState() {
+        if (!state.code) {
+            setMessage("No hay codigo de lobby asociado.");
+            return;
+        }
+
+        setMessage("Cargando estado de partida...");
+        go(`${config.rootUrl}/api/games/${state.code}/state`, "GET")
+            .then((response) => {
+                if (response.type === "GAME_STATE_UPDATE") {
+                    applyServerState(response);
+                    setMessage("Estado sincronizado.");
+                } else {
+                    setMessage("No se pudo cargar el estado inicial.");
+                }
+            })
+            .catch((e) => {
+                setMessage(`Error al cargar estado inicial: ${e.text || e.status || "desconocido"}`);
+            });
     }
 
     function render() {
@@ -262,23 +311,8 @@
         directionLabel.textContent = state.sentido === 1 ? "Horario" : "Antihorario";
     }
 
-    const sampleState = {
-        mazos: [
-            ["R1", "V2", "A3", "Y4", "R+2", "WC", "Y5"],
-            ["Y1", "A8", "V9", "R5", "W+4"],
-            ["V1", "V7", "Y3", "A5", "R4"],
-            ["R9", "A1", "Y7", "V3", "R2", "A+2"]
-        ],
-        robo: ["Y9", "A2", "V0", "R7", "Y8", "A9", "V+2", "R6", "Y0", "A6"],
-        jugadas: ["R3"],
-        turno: 0,
-        sentido: 1
-    };
+    window.unoRepinta = applyServerState;
 
-    setMessage("Pulsa una carta valida de tu mano o el mazo para robar.");
-
-    // De cara a WS: el servidor podra invocar window.unoRepinta(payload).
-    window.unoRepinta = repinta;
-
-    repinta(sampleState);
+    setupWsHook();
+    loadInitialState();
 })();
