@@ -242,12 +242,12 @@
     }
 
     function setupWsHook() {
-        if (!window.ws || typeof window.ws.receive !== "function") {
+        if (!ws || typeof ws.receive !== "function") {
             return;
         }
 
-        const oldReceive = window.ws.receive;
-        window.ws.receive = (m) => {
+        const oldReceive = ws.receive;
+        ws.receive = (m) => {
             oldReceive(m);
             onWsMessage(m);
         };
