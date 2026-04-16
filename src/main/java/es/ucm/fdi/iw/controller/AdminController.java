@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import es.ucm.fdi.iw.model.Topic;
+import es.ucm.fdi.iw.LobbyService;
 import es.ucm.fdi.iw.model.Lorem;
 import es.ucm.fdi.iw.model.Message;
 import es.ucm.fdi.iw.model.Transferable;
@@ -43,6 +44,9 @@ public class AdminController {
   @Autowired
   private EntityManager entityManager;
 
+  @Autowired
+    private LobbyService lobbyService;
+
   @ModelAttribute
   public void populateModel(HttpSession session, Model model) {
     for (String name : new String[] { "u", "url", "ws", "topics"}) {
@@ -57,6 +61,7 @@ public class AdminController {
     log.info("Admin acaba de entrar");
     model.addAttribute("users",
         entityManager.createQuery("select u from User u").getResultList());
+    model.addAttribute("lobbies", lobbyService.getLobbies());
     return "admin";
   }
 

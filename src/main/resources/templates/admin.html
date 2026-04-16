@@ -80,6 +80,31 @@
         </table>
          <br>
          <hr>
+        <h3 class="mt-5">Partidas</h3>
+        <table id="tablaPartidas" class="tabla-Partidas table table-striped table-hover align-middle table-bordered">
+            <thead>
+            <tr>
+                <th>Codigo</th>
+                <th>Host</th>
+                <th>Visibilidad</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr th:each="lobby : ${lobbies}">
+                    <td th:text="${lobby.code}"></td>
+                    <td th:text="${lobby.host.username}"></td>
+                    <td th:if="${lobby.privado}">
+                        Privado
+                    </td>
+                    <td th:unless="${lobby.privado}">
+                        Publico
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+         <br>
+         <hr>
         <div class="container m-2">
 
             <h2>Últimos 5 mensajes del sistema</h2>

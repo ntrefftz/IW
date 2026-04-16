@@ -43,6 +43,10 @@ public class LobbyService {
                 .collect(Collectors.toList());
     }
 
+    public List<Game> getLobbies() {
+        return mockGames;
+    }
+
     public String createGame(User host) {
         Game newGame = new Game();
         String randomCode = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
