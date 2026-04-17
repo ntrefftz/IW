@@ -4,9 +4,10 @@
 <head>
     <th:block th:replace="~{fragments/head :: header}" />
     <title>IW: Admin</title>
-   
-    
-    <link rel="stylesheet" th:href="@{/css/simple-datatables-10.css}" href="/css/simple-datatables-10.css" type="text/css" />
+
+
+    <link rel="stylesheet" th:href="@{/css/simple-datatables-10.css}" href="/css/simple-datatables-10.css"
+        type="text/css" />
     <link rel="stylesheet" th:href="@{/css/admin.css}" href="/css/admin.css" type="text/css" />
     <link rel="stylesheet" th:href="@{/css/bootstrap-5.3.3.css}" href="/css/bootstrap-5.3.3.css" type="text/css" />
 </head>
@@ -19,100 +20,101 @@
             <h1 class="titulo-admin">Gestión de usuarios</h1>
             <button id="botonAnadir" class="btn btn-primary boton-anadir mb-3">Añadir usuario</button>
             <div id="modalUsuario" class="modal-usuario" style="display:none;">
-            <div class="modal-contenido">
-                <div class="container d-flex mt-4">
-                    <span id="cerrarModal" class="modal-cerrar text-danger fw-bold px-3" style="font-size: 2rem; cursor:pointer;">&times;</span>
-                    <h4 class="mb-3">Nuevo usuario</h4>
-                </div>
-                <form id="formUsuario" class="container">
-                    <div class="row g-3 align-items-center">
-                        <div class="col-md-4">
-                            <label for="nombreUsuario" class="form-label">Nombre y apellidos</label>
-                            <input type="text" id="nombreUsuario" class="form-control" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="rolUsuario" class="form-label">Rol</label>
-                            <input type="text" id="rolUsuario" class="form-control" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="grupoUsuario" class="form-label">Grupo</label>
-                            <input type="text" id="grupoUsuario" class="form-control">
-                        </div>
-                        <div class="col-md-2 ">
-                            <button type="submit" class="btn btn-primary w-100">Añadir</button>
-                        </div>
+                <div class="modal-contenido">
+                    <div class="container d-flex mt-4">
+                        <span id="cerrarModal" class="modal-cerrar text-danger fw-bold px-3"
+                            style="font-size: 2rem; cursor:pointer;">&times;</span>
+                        <h4 class="mb-3">Nuevo usuario</h4>
                     </div>
-                </form>
+                    <form id="formUsuario" class="container">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-4">
+                                <label for="nombreUsuario" class="form-label">Nombre y apellidos</label>
+                                <input type="text" id="nombreUsuario" class="form-control" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="rolUsuario" class="form-label">Rol</label>
+                                <input type="text" id="rolUsuario" class="form-control" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="grupoUsuario" class="form-label">Grupo</label>
+                                <input type="text" id="grupoUsuario" class="form-control">
+                            </div>
+                            <div class="col-md-2 ">
+                                <button type="submit" class="btn btn-primary w-100">Añadir</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
-        <h3 class="mt-5">Usuarios</h3>
-        <table id="tablaUsuarios" class="tabla-usuarios table table-striped table-hover align-middle table-bordered">
-            <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nombre & Apellidos</th>
-                <th>Roles</th>
-                <th>Grupos</th>
-                <th class="acciones">Acciones</th>
-                <th >Opciones</th>
+            <h3 class="mt-5">Usuarios</h3>
+            <table id="tablaUsuarios"
+                class="tabla-usuarios table table-striped table-hover align-middle table-bordered">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Nombre & Apellidos</th>
+                        <th>Roles</th>
+                        <th>Grupos</th>
+                        <th class="acciones">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.id}"></td>
+                        <td th:text="${user.username}"></td>
+                        <td th:text="${user.roles}"></td>
+                        <td>
+                            <form th:action="@{'/admin/toggle/' + ${user.id}}" th:method="post">
+                                <button th:if="${user.enabled}" type="submit"
+                                    class="toggle btn btn-danger">Deshabilitar</button>
+                                <button th:unless="${user.enabled}" type="submit"
+                                    class="toggle btn btn-primary">Habilitar</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form th:action="@{'/admin/chatBan/' + ${user.id}}" th:method="post">
+                                <button type="submit" class="chat-toggle btn btn-sm btn-outline-danger">
+                                    <img th:src="${user.chatBan} ? '/img/icons/chat.svg' : '/img/icons/chat_ban.svg'"
+                                        height="18px">
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <br>
+            <hr>
+            <h3 class="mt-5">Partidas</h3>
+            <table id="tablaPartidas"
+                class="tabla-Partidas table table-striped table-hover align-middle table-bordered">
+                <thead>
+                    <tr>
+                        <th>Codigo</th>
+                        <th>Host</th>
+                        <th>Visibilidad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="lobby : ${lobbies}">
+                        <td th:text="${lobby.code}"></td>
+                        <td th:text="${lobby.host.username}"></td>
+                        <td th:if="${lobby.privado}">Privado</td>
+                        <td th:unless="${lobby.privado}">Publico</td>
+                    </tr>
+                </tbody>
+            </table>
+            <br>
+            <hr>
+            <div class="container m-2">
 
-            </tr>
-            </thead>
-            <tbody>
-                <tr th:each="user : ${users}">
-                    <td th:text="${user.id}">1</td>
-                    <td th:text="${user.username}">paco</td>
-                    <td>
-                        <ul>
-                            <li th:text="${user.roles}">Role</li>
-                        </ul>
-                    </td>
-                    <td>
-                        <form th:action="@{'/admin/toggle/' + ${user.id}}" th:method="post">
-                            <button th:if="${user.enabled}" type="submit"
-                                class="toggle btn btn-danger">Deshabilitar</button>
-                            <button th:unless="${user.enabled}" type="submit"
-                                class="toggle btn btn-primary">Habilitar</button>
-                        </form>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-         <br>
-         <hr>
-        <h3 class="mt-5">Partidas</h3>
-        <table id="tablaPartidas" class="tabla-Partidas table table-striped table-hover align-middle table-bordered">
-            <thead>
-            <tr>
-                <th>Codigo</th>
-                <th>Host</th>
-                <th>Visibilidad</th>
-                <th>Acciones</th>
-            </tr>
-            </thead>
-            <tbody>
-                <tr th:each="lobby : ${lobbies}">
-                    <td th:text="${lobby.code}"></td>
-                    <td th:text="${lobby.host.username}"></td>
-                    <td th:if="${lobby.privado}">
-                        Privado
-                    </td>
-                    <td th:unless="${lobby.privado}">
-                        Publico
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-         <br>
-         <hr>
-        <div class="container m-2">
+                <h2>Últimos 5 mensajes del sistema</h2>
+                <table id="messages"></table> <!-- will be filled with JSON data-->
+                <button id="refresh" class="btn btn-primary">Actualizar vía AJAX</button>
 
-            <h2>Últimos 5 mensajes del sistema</h2>
-            <table id="messages"></table> <!-- will be filled with JSON data-->
-            <button id="refresh" class="btn btn-primary">Actualizar vía AJAX</button>
+            </div>
 
-        </div>
-        
     </main>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
@@ -137,7 +139,26 @@
             });
         });
 
+        document.querySelectorAll('.chat-toggle').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
 
+                const form = e.target.closest('form');
+                const img = form.querySelector('img');
+
+                go(form.action, 'POST').then((data) => {
+                    if (data.chatBan) {
+                        img.src = '/img/icons/chat.svg';
+                        console.log("Usuario silenciado");
+                    } else {
+                        img.src = '/img/icons/chat_ban.svg';
+                        console.log("Silencio levantado");
+                    }
+                }).catch(err => {
+                    console.error("Error al mutear:", err);
+                });
+            });
+        });
     </script>
 
     <script type="module">

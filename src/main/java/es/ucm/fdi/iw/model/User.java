@@ -43,12 +43,10 @@ public class User implements Transferable<User.Transfer> {
   private String password;
   private boolean enabled;
   private String roles; // split by ',' to separate roles
-  
   private int numVictorias;
   private int numDerrotas;
+  private boolean chatBan = false; // baneo de chat
   
-
-
   /**
    * Checks whether this user has a given role.
    * 
@@ -69,12 +67,13 @@ public class User implements Transferable<User.Transfer> {
     private int numVictorias;
     private String password;
     private String roles;
+    private boolean chatBan;
   }
 
   @Override
   public Transfer toTransfer() {
     
-    return new Transfer(id, username, numDerrotas, numVictorias, password, roles);
+    return new Transfer(id, username, numDerrotas, numVictorias, password, roles, chatBan);
   }
 
   @Override

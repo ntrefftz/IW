@@ -75,6 +75,16 @@ public class AdminController {
     return "{\"enabled\":" + target.isEnabled() + "}";
   }
 
+  @PostMapping("/chatBan/{id}")
+  @Transactional
+  @ResponseBody
+  public String chatBanUser(@PathVariable long id, Model model) {
+    log.info("Admin mutea a" + id);
+    User target = entityManager.find(User.class, id);
+    target.setChatBan(!target.isChatBan());
+    return "{\"chatBan\":" + target.isChatBan() + "}";
+  }
+
   /**
    * Returns JSON with all received messages
    */
