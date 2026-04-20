@@ -76,6 +76,10 @@ public class LobbyService {
             throw new LobbyException("Debes iniciar sesión para unirte a la sala");
         }
 
+        if (game.getEstado() != Game.Estado.LOBBY) {
+            throw new LobbyException("La partida ya ha comenzado");
+        }
+
         if (game.getPlayers().stream().anyMatch(p -> sameUser(p, user))) {
             return;
         }
@@ -95,11 +99,22 @@ public class LobbyService {
         return game != null && user != null && sameUser(game.getHost(), user);
     }
 
+    public boolean isMember(Game game, User user) {
+        if (game == null || user == null) {
+            return false;
+        }
+        return game.getPlayers().stream().anyMatch(p -> sameUser(p, user));
+    }
+
     public void updateLobbySettings(String code, User user, String modalidad, boolean privado) {
         Game game = getLobbyByCode(code);
 
         if (!isOwner(game, user)) {
             throw new LobbyException("Solo el owner puede modificar la configuración");
+        }
+
+        if (game.getEstado() != Game.Estado.LOBBY) {
+            throw new LobbyException("No se puede cambiar la configuración con la partida iniciada");
         }
 
         game.setModalidad(modalidad);
@@ -145,6 +160,10 @@ public class LobbyService {
 
         if (!isOwner(game, user)) {
             throw new LobbyException("Solo el owner puede comenzar la partida");
+        }
+
+        if (game.getEstado() != Game.Estado.LOBBY) {
+            throw new LobbyException("La partida no está en estado de lobby");
         }
 
         if (game.getPlayers().size() < 2) {

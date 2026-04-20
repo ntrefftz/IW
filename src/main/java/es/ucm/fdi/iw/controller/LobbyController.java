@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.List;
@@ -56,6 +57,7 @@ public class LobbyController {
         try {
             User user = (User) session.getAttribute("u");
             lobbyService.attemptJoin(code, password, user);
+            broadcastLobbyState(lobbyService.getLobbyByCode(code));
             session.setAttribute("currentLobbyCode", code);
             return "redirect:/lobby?code=" + code;
         } catch (LobbyException e) {
@@ -66,20 +68,20 @@ public class LobbyController {
 
     @PostMapping("/lobbies/create")
     public String createLobby(HttpSession session) {
-    
-    User creator = (User) session.getAttribute("u");
-    
-    // Si no hay usuario (caso de prueba), creamos uno genérico
-    if (creator == null) {
-        creator = new User();
-        creator.setUsername("Jugador_Nuevo");
-    }
+        User creator = (User) session.getAttribute("u");
 
-    String newCode = lobbyService.createGame(creator);
-    session.setAttribute("currentLobbyCode", newCode);
-    
-    return "redirect:/lobby?code=" + newCode;
-}
+        // Si no hay usuario (caso de prueba), creamos uno genérico
+        if (creator == null) {
+            creator = new User();
+            creator.setUsername("Jugador_Nuevo");
+        }
+
+        String newCode = lobbyService.createGame(creator);
+        broadcastLobbyState(lobbyService.getLobbyByCode(newCode));
+        session.setAttribute("currentLobbyCode", newCode);
+
+        return "redirect:/lobby?code=" + newCode;
+    }
 
     @GetMapping("/lobby")
     public String showLobby(@RequestParam(required = false) String code,
@@ -95,6 +97,11 @@ public class LobbyController {
 
         try {
             Game lobby = lobbyService.getLobbyByCode(lobbyCode);
+
+            if (lobby.getEstado() == Game.Estado.PARTIDA) {
+                return "redirect:/game?code=" + lobbyCode;
+            }
+
             User currentUser = (User) session.getAttribute("u");
             boolean isOwner = lobbyService.isOwner(lobby, currentUser);
 
@@ -104,6 +111,8 @@ public class LobbyController {
             model.addAttribute("players", players);
             model.addAttribute("isOwner", isOwner);
             model.addAttribute("maxPlayers", 4);
+            model.addAttribute("topics", "lobby/" + lobbyCode);
+            model.addAttribute("currentUsername", currentUser != null ? currentUser.getUsername() : "");
             session.setAttribute("currentLobbyCode", lobbyCode);
         } catch (LobbyException e) {
             ra.addFlashAttribute("error", e.getMessage());
@@ -122,6 +131,7 @@ public class LobbyController {
         try {
             User currentUser = (User) session.getAttribute("u");
             lobbyService.updateLobbySettings(code, currentUser, modalidad, privado);
+            broadcastLobbyState(lobbyService.getLobbyByCode(code));
             return "redirect:/lobby?code=" + code;
         } catch (LobbyException e) {
             ra.addFlashAttribute("error", e.getMessage());
@@ -136,6 +146,13 @@ public class LobbyController {
         try {
             User currentUser = (User) session.getAttribute("u");
             lobbyService.leaveLobby(code, currentUser);
+
+            try {
+                broadcastLobbyState(lobbyService.getLobbyByCode(code));
+            } catch (LobbyException ignored) {
+                // El lobby ha podido desaparecer al salir el ultimo jugador.
+            }
+
             session.removeAttribute("currentLobbyCode");
             return "redirect:/lobby-select";
         } catch (LobbyException e) {
@@ -151,6 +168,7 @@ public class LobbyController {
         try {
             User currentUser = (User) session.getAttribute("u");
             lobbyService.closeLobby(code, currentUser);
+            broadcastLobbyClosed(code);
             session.removeAttribute("currentLobbyCode");
             return "redirect:/lobby-select";
         } catch (LobbyException e) {
@@ -168,6 +186,9 @@ public class LobbyController {
 
             //Validaciones y cambio de estado a PARTIDA
             lobbyService.startLobby(code, currentUser);
+
+            // Sincroniza a todos con el estado final del lobby antes de empezar.
+            broadcastLobbyState(game);
 
             //Usamos el nuevo servicio para "montar el tablero"
             unoService.prepareGame(game);
@@ -188,6 +209,7 @@ public class LobbyController {
             ObjectNode msg = objectMapper.createObjectNode();
             msg.put("type", "GAME_START");
             msg.put("code", code);
+            msg.put("redirectPath", "/game?code=" + code);
             messagingTemplate.convertAndSend("/topic/lobby/" + code, msg);
 
             return "redirect:/game?code=" + code;
@@ -195,5 +217,35 @@ public class LobbyController {
             ra.addFlashAttribute("error", e.getMessage());
             return "redirect:/lobby?code=" + code;
         }
+    }
+
+    private void broadcastLobbyState(Game lobby) {
+        messagingTemplate.convertAndSend("/topic/lobby/" + lobby.getCode(), buildLobbyStateMessage(lobby));
+    }
+
+    private void broadcastLobbyClosed(String code) {
+        ObjectNode msg = objectMapper.createObjectNode();
+        msg.put("type", "LOBBY_CLOSED");
+        msg.put("code", code);
+        messagingTemplate.convertAndSend("/topic/lobby/" + code, msg);
+    }
+
+    private ObjectNode buildLobbyStateMessage(Game lobby) {
+        ObjectNode msg = objectMapper.createObjectNode();
+        msg.put("type", "LOBBY_STATE_UPDATE");
+        msg.put("code", lobby.getCode());
+        msg.put("estado", lobby.getEstado().name());
+        msg.put("modalidad", lobby.getModalidad());
+        msg.put("privado", lobby.isPrivado());
+
+        User host = lobby.getHost();
+        msg.put("host", host != null ? host.getUsername() : "");
+
+        ArrayNode playersNode = msg.putArray("players");
+        for (User p : lobby.getPlayers()) {
+            playersNode.add(p.getUsername() != null ? p.getUsername() : "Jugador sin nombre");
+        }
+        msg.put("playerCount", lobby.getPlayers().size());
+        return msg;
     }
 }

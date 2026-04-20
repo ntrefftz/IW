@@ -3,6 +3,15 @@
     const turnLabel = document.querySelector("#turnLabel");
     const directionLabel = document.querySelector("#directionLabel");
     const gameMessage = document.querySelector("#gameMessage");
+    const gameModeBadge = document.querySelector("#gameModeBadge");
+    const gameVisibilityBadge = document.querySelector("#gameVisibilityBadge");
+
+    const chatForm = document.querySelector("#lobbyChatForm");
+    const chatInput = document.querySelector("#lobbyChatInput");
+    const chatMessages = document.querySelector("#lobbyChatMessages");
+    const chatEmpty = document.querySelector("#lobbyChatEmpty");
+    const chatError = document.querySelector("#lobbyChatError");
+    const chatButton = chatForm ? chatForm.querySelector("button[type='submit']") : null;
 
     if (!svg || !turnLabel || !directionLabel) {
         return;
@@ -27,6 +36,9 @@
 
     const state = {
         code: (window.initialUnoState && window.initialUnoState.lobbyCode) || "",
+        currentUsername: (window.initialUnoState && window.initialUnoState.currentUsername) || "",
+        lobbyMode: (window.initialUnoState && window.initialUnoState.lobbyMode) || "UNO",
+        lobbyPrivate: !!(window.initialUnoState && window.initialUnoState.lobbyPrivate),
         yourHand: [],
         opponentCounts: [0, 0, 0],
         topCardCode: "R0",
@@ -40,6 +52,121 @@
         if (gameMessage) {
             gameMessage.textContent = msg;
         }
+    }
+
+    function absolutePath(path) {
+        const base = (config && config.rootUrl ? config.rootUrl : "").replace(/\/+$/, "");
+        const normalized = path.startsWith("/") ? path : `/${path}`;
+        return `${base}${normalized}`;
+    }
+
+    function renderLobbyMeta() {
+        if (gameModeBadge) {
+            gameModeBadge.textContent = state.lobbyMode;
+        }
+        if (gameVisibilityBadge) {
+            gameVisibilityBadge.textContent = state.lobbyPrivate ? "Privada" : "Publica";
+        }
+    }
+
+    function applyLobbyState(update) {
+        if (!update) {
+            return;
+        }
+        if (typeof update.modalidad === "string" && update.modalidad.length > 0) {
+            state.lobbyMode = update.modalidad;
+        }
+        if (typeof update.privado === "boolean") {
+            state.lobbyPrivate = update.privado;
+        }
+        renderLobbyMeta();
+    }
+
+    function setChatError(msg) {
+        if (!chatError) {
+            return;
+        }
+        if (msg) {
+            chatError.textContent = msg;
+            chatError.classList.remove("d-none");
+        } else {
+            chatError.textContent = "";
+            chatError.classList.add("d-none");
+        }
+    }
+
+    function formatTime(value) {
+        if (!value) {
+            return "";
+        }
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) {
+            return "";
+        }
+        return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function appendChatMessage(message) {
+        if (!chatMessages || !message) {
+            return;
+        }
+        if (chatEmpty) {
+            chatEmpty.remove();
+        }
+
+        const row = document.createElement("div");
+        row.className = "mb-2";
+
+        const header = document.createElement("div");
+        header.className = "small text-muted";
+        const author = (message.from || "Anonimo").toString();
+        const time = formatTime(message.sentAt);
+        header.textContent = time ? `${author} · ${time}` : author;
+
+        const text = document.createElement("div");
+        text.className = "small";
+        if (author === state.currentUsername) {
+            text.classList.add("text-primary");
+        }
+        text.textContent = (message.message || "").toString();
+
+        row.appendChild(header);
+        row.appendChild(text);
+        chatMessages.appendChild(row);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function submitChat(event) {
+        event.preventDefault();
+        if (!chatInput || !chatButton || !state.code) {
+            return;
+        }
+
+        const text = chatInput.value.trim();
+        if (!text) {
+            return;
+        }
+
+        setChatError("");
+        chatInput.disabled = true;
+        chatButton.disabled = true;
+
+        go(absolutePath(`/api/lobbies/${encodeURIComponent(state.code)}/chat`), "POST", { message: text })
+            .then((response) => {
+                if (response && response.type === "LOBBY_CHAT_REJECTED") {
+                    setChatError(response.message || "No se pudo enviar el mensaje.");
+                    return;
+                }
+                chatInput.value = "";
+            })
+            .catch((e) => {
+                setChatError(e.text || "Error al enviar el mensaje");
+            })
+            .finally(() => {
+                chatInput.disabled = false;
+                chatButton.disabled = false;
+                chatInput.focus();
+            });
     }
 
     function parseCard(code) {
@@ -236,6 +363,26 @@
             return;
         }
 
+        if (message.type === "LOBBY_STATE_UPDATE") {
+            applyLobbyState(message);
+            return;
+        }
+
+        if (message.type === "LOBBY_CHAT_MESSAGE") {
+            appendChatMessage(message);
+            return;
+        }
+
+        if (message.type === "LOBBY_CHAT_REJECTED") {
+            setChatError(message.message || "No se pudo enviar el mensaje.");
+            return;
+        }
+
+        if (message.type === "LOBBY_CLOSED") {
+            window.location.assign(absolutePath("/lobby-select"));
+            return;
+        }
+
         if (message.type === "GAME_START") {
             setMessage("Partida iniciada. Esperando estado inicial...");
         }
@@ -314,5 +461,10 @@
     window.unoRepinta = applyServerState;
 
     setupWsHook();
+    renderLobbyMeta();
     loadInitialState();
+
+    if (chatForm) {
+        chatForm.addEventListener("submit", submitChat);
+    }
 })();
