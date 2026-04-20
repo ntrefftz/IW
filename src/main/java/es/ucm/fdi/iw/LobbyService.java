@@ -3,18 +3,24 @@ package es.ucm.fdi.iw;
 import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.User;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
 public class LobbyService {
 
-    private List<Game> mockGames = new ArrayList<>();
+    private static final int MAX_PLAYERS = 4;
+    private static final String MODE_ALL = "ALL";
+    private static final List<String> AVAILABLE_MODES = List.of("UNO");
+
+    private final List<Game> mockGames = new ArrayList<>();
 
     public LobbyService() {
-        
         User host = new User();
         host.setUsername("MasterCard99");
 
@@ -26,21 +32,35 @@ public class LobbyService {
         successGame.getPlayers().add(host);
         mockGames.add(successGame);
 
-        
         Game fullGame = new Game();
         fullGame.setCode("LLENA99");
         fullGame.setPrivado(false);
         fullGame.setHost(host);
         fullGame.setEstado(Game.Estado.LOBBY);
-        
-        for (int i = 0; i < 4; i++) fullGame.getPlayers().add(new User());
+
+        for (int i = 0; i < MAX_PLAYERS; i++) {
+            fullGame.getPlayers().add(new User());
+        }
         mockGames.add(fullGame);
     }
 
     public List<Game> getPublicLobbies() {
+        return getPublicLobbies(null, MODE_ALL);
+    }
+
+    public List<Game> getPublicLobbies(String query, String mode) {
+        String normalizedQuery = normalizeSearchQuery(query);
+        String normalizedMode = normalizeMode(mode);
+
         return mockGames.stream()
-                .filter(g -> !g.isPrivado() && g.getEstado() == Game.Estado.LOBBY)
+                .filter(this::isPublicLobby)
+                .filter(g -> matchesSearch(g, normalizedQuery))
+                .filter(g -> matchesMode(g, normalizedMode))
                 .collect(Collectors.toList());
+    }
+
+    public List<String> getAvailableModes() {
+        return AVAILABLE_MODES;
     }
 
     public List<Game> getLobbies() {
@@ -49,22 +69,23 @@ public class LobbyService {
 
     public String createGame(User host) {
         Game newGame = new Game();
-        String randomCode = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
-        
+        String randomCode = generateUniqueCode();
+
         newGame.setCode(randomCode);
         newGame.setHost(host);
         newGame.setEstado(Game.Estado.LOBBY);
         newGame.setPrivado(false);
         newGame.setModalidad("UNO");
         newGame.getPlayers().add(host);
-        
+
         mockGames.add(newGame);
         return randomCode;
     }
 
     public Game getLobbyByCode(String code) {
+        String normalizedCode = normalizeCode(code);
         return mockGames.stream()
-                .filter(g -> g.getCode().equals(code))
+                .filter(g -> g.getCode().equals(normalizedCode))
                 .findFirst()
                 .orElseThrow(() -> new LobbyException("Partida no encontrada"));
     }
@@ -73,7 +94,7 @@ public class LobbyService {
         Game game = getLobbyByCode(code);
 
         if (user == null) {
-            throw new LobbyException("Debes iniciar sesión para unirte a la sala");
+            throw new LobbyException("Debes iniciar sesion para unirte a la sala");
         }
 
         if (game.getEstado() != Game.Estado.LOBBY) {
@@ -84,15 +105,33 @@ public class LobbyService {
             return;
         }
 
-        if (game.getPlayers().size() >= 4) {
-            throw new LobbyException("La sala está llena");
+        if (game.getPlayers().size() >= MAX_PLAYERS) {
+            throw new LobbyException("La sala esta llena");
         }
 
-        if (game.isPrivado() && (password == null || !password.equals(game.getPassword()))) {
-            throw new LobbyException("Contraseña incorrecta");
+        if (requiresPassword(game) && (password == null || !password.equals(game.getPassword()))) {
+            throw new LobbyException("Contrasena incorrecta");
         }
 
         game.getPlayers().add(user);
+    }
+
+    public Game joinRandomPublicLobby(User user) {
+        if (user == null) {
+            throw new LobbyException("Debes iniciar sesion para unirte a la sala");
+        }
+
+        List<Game> candidates = mockGames.stream()
+                .filter(this::isJoinablePublicLobby)
+                .collect(Collectors.toList());
+
+        if (candidates.isEmpty()) {
+            throw new LobbyException("No hay partidas publicas disponibles ahora mismo");
+        }
+
+        Game selected = candidates.get(ThreadLocalRandom.current().nextInt(candidates.size()));
+        attemptJoin(selected.getCode(), null, user);
+        return selected;
     }
 
     public boolean isOwner(Game game, User user) {
@@ -110,11 +149,11 @@ public class LobbyService {
         Game game = getLobbyByCode(code);
 
         if (!isOwner(game, user)) {
-            throw new LobbyException("Solo el owner puede modificar la configuración");
+            throw new LobbyException("Solo el owner puede modificar la configuracion");
         }
 
         if (game.getEstado() != Game.Estado.LOBBY) {
-            throw new LobbyException("No se puede cambiar la configuración con la partida iniciada");
+            throw new LobbyException("No se puede cambiar la configuracion con la partida iniciada");
         }
 
         game.setModalidad(modalidad);
@@ -143,10 +182,7 @@ public class LobbyService {
     }
 
     public void closeLobby(String code, User user) {
-        Game game = mockGames.stream()
-                .filter(g -> g.getCode().equals(code))
-                .findFirst()
-                .orElseThrow(() -> new LobbyException("Partida no encontrada"));
+        Game game = getLobbyByCode(code);
 
         if (!isOwner(game, user)) {
             throw new LobbyException("Solo el owner puede cerrar el lobby");
@@ -163,7 +199,7 @@ public class LobbyService {
         }
 
         if (game.getEstado() != Game.Estado.LOBBY) {
-            throw new LobbyException("La partida no está en estado de lobby");
+            throw new LobbyException("La partida no esta en estado de lobby");
         }
 
         if (game.getPlayers().size() < 2) {
@@ -171,6 +207,86 @@ public class LobbyService {
         }
 
         game.setEstado(Game.Estado.PARTIDA);
+    }
+
+    private String generateUniqueCode() {
+        while (true) {
+            String candidate = UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase(Locale.ROOT);
+            boolean exists = false;
+            for (Game game : mockGames) {
+                if (candidate.equals(game.getCode())) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                return candidate;
+            }
+        }
+    }
+
+    private String normalizeCode(String code) {
+        if (code == null) {
+            throw new LobbyException("Debes indicar un codigo de partida");
+        }
+
+        String normalized = code.trim().toUpperCase(Locale.ROOT);
+        if (normalized.isEmpty()) {
+            throw new LobbyException("Debes indicar un codigo de partida");
+        }
+        return normalized;
+    }
+
+    private String normalizeSearchQuery(String query) {
+        if (query == null) {
+            return "";
+        }
+        return query.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeMode(String mode) {
+        if (mode == null || mode.isBlank()) {
+            return MODE_ALL;
+        }
+        String normalized = mode.trim().toUpperCase(Locale.ROOT);
+        if (MODE_ALL.equals(normalized) || AVAILABLE_MODES.contains(normalized)) {
+            return normalized;
+        }
+        return MODE_ALL;
+    }
+
+    private boolean isPublicLobby(Game game) {
+        return game != null && !game.isPrivado() && game.getEstado() == Game.Estado.LOBBY;
+    }
+
+    private boolean isJoinablePublicLobby(Game game) {
+        return isPublicLobby(game) && game.getPlayerCount() < MAX_PLAYERS;
+    }
+
+    private boolean matchesSearch(Game game, String query) {
+        if (query.isEmpty()) {
+            return true;
+        }
+
+        String code = game.getCode() != null ? game.getCode().toLowerCase(Locale.ROOT) : "";
+        String host = game.getHost() != null && game.getHost().getUsername() != null
+                ? game.getHost().getUsername().toLowerCase(Locale.ROOT)
+                : "";
+
+        return code.contains(query) || host.contains(query);
+    }
+
+    private boolean matchesMode(Game game, String mode) {
+        if (MODE_ALL.equals(mode)) {
+            return true;
+        }
+
+        String gameMode = game.getModalidad() != null ? game.getModalidad().toUpperCase(Locale.ROOT) : "";
+        return gameMode.equals(mode);
+    }
+
+    private boolean requiresPassword(Game game) {
+        return game.isPrivado() && game.getPassword() != null && !game.getPassword().isBlank();
     }
 
     private boolean sameUser(User a, User b) {

@@ -17,42 +17,66 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
 
-            <div class="d-flex justify-content-between align-items-end mb-4">
+            <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
                 <div>
                     <h1 class="fw-bold mb-0 text-dark">SELECTOR DE <span class="text-warning border-bottom border-4 border-warning">LOBBIES</span></h1>
-                    <p class="text-muted mt-2">Encuentra una partida y demuestra quién es el mejor con las cartas.</p>
+                    <p class="text-muted mt-2">Encuentra una partida y demuestra quien es el mejor con las cartas.</p>
                 </div>
-                <div class="d-none d-md-flex gap-2">
-                    <button class="btn btn-primary fw-bold px-4 shadow-sm">Partida Random</button>
-                    <button class="btn btn-outline-dark fw-bold px-4 shadow-sm">Refrescar</button>
-                    
-                    <form th:action="@{/lobbies/create}" method="post" style="display:inline;">
+                <div class="d-flex flex-wrap gap-2">
+                    <form th:action="@{/lobbies/join-random}" method="post" class="m-0">
+                        <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">Partida Random</button>
+                    </form>
+                    <form th:action="@{/lobby-select}" method="get" class="m-0">
+                        <input type="hidden" name="q" th:value="${searchQuery}">
+                        <input type="hidden" name="mode" th:value="${selectedMode}">
+                        <button type="submit" class="btn btn-outline-dark fw-bold px-4 shadow-sm">Refrescar</button>
+                    </form>
+                    <form th:action="@{/lobbies/create}" method="post" class="m-0">
                         <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm">Crear Lobby</button>
                     </form>
                 </div>
             </div>
 
-            <div class="row g-2 bg-light p-3 rounded-4 mb-5 border shadow-sm">
+            <form th:action="@{/lobby-select}" method="get" class="row g-2 bg-light p-3 rounded-4 mb-5 border shadow-sm">
                 <div class="col-md-8">
                     <div class="input-group">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control bg-white border-start-0" placeholder="Buscar por nombre o host...">
+                        <input type="text"
+                               class="form-control bg-white border-start-0"
+                               name="q"
+                               th:value="${searchQuery}"
+                               placeholder="Buscar por nombre o host...">
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <button class="btn btn-white border w-100 shadow-sm">Filtrar</button>
+                    <button type="submit" class="btn btn-white border w-100 shadow-sm">Filtrar</button>
                 </div>
                 <div class="col-md-2">
-                    <button class="btn btn-white border w-100 shadow-sm">Todos los modos</button>
+                    <select name="mode" class="form-select bg-white border shadow-sm">
+                        <option value="ALL" th:selected="${selectedMode == 'ALL'}">Todos los modos</option>
+                        <option th:each="modeOption : ${availableModes}"
+                                th:value="${modeOption}"
+                                th:text="${modeOption}"
+                                th:selected="${selectedMode == modeOption}">
+                            UNO
+                        </option>
+                        <option value="" disabled>Mas modos (proximamente)</option>
+                    </select>
                 </div>
-            </div>
+            </form>
 
             <div class="card bg-white border mb-5 shadow-sm">
                 <div class="card-body p-4">
                     <h2 class="h5 mb-3 fw-bold text-uppercase text-muted">Unirse a partida privada</h2>
                     <form th:action="@{/lobbies/join}" method="post" class="row g-3">
                         <div class="col-md-5">
-                            <input type="text" class="form-control bg-light border" id="gameCode" name="code" placeholder="Código de partida (Ej: ABC123)" required>
+                            <input type="text"
+                                   class="form-control bg-light border"
+                                   id="gameCode"
+                                   name="code"
+                                   placeholder="Codigo de partida (Ej: ABC123)"
+                                   autocomplete="off"
+                                   required>
                         </div>
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-warning w-100 fw-bold shadow-sm">UNIRSE</button>
@@ -61,8 +85,8 @@
                 </div>
             </div>
 
-            <h2 class="h4 mb-4 fw-bold text-dark">Partidas públicas</h2>
-            
+            <h2 class="h4 mb-4 fw-bold text-dark">Partidas publicas</h2>
+
             <div class="row g-4 table-responsive">
                 <div th:each="lobby : ${publicLobbies}" class="col-md-6 col-lg-4 col-xl-3">
                     <div class="card bg-white border h-100 rounded-4 shadow-sm">
@@ -89,11 +113,11 @@
                             </div>
 
                             <div class="mt-auto d-flex justify-content-between align-items-center">
-                                <span class="badge bg-light text-dark border py-2 px-3 text-uppercase" th:text="${lobby.gameType != null ? lobby.gameType : 'CLÁSICO'}">CLÁSICO</span>
-                                
+                                <span class="badge bg-light text-dark border py-2 px-3 text-uppercase" th:text="${lobby.gameType != null ? lobby.gameType : 'CLASICO'}">CLASICO</span>
+
                                 <form th:action="@{/lobbies/join}" method="post">
                                     <input type="hidden" name="code" th:value="${lobby.code}">
-                                    <button type="submit" 
+                                    <button type="submit"
                                             class="btn btn-sm fw-bold px-3 py-2 shadow-sm"
                                             th:classappend="${lobby.playerCount >= 4} ? 'btn-secondary disabled' : 'btn-warning'"
                                             th:disabled="${lobby.playerCount >= 4}"
@@ -108,7 +132,7 @@
 
                 <div th:if="${publicLobbies == null || #lists.isEmpty(publicLobbies)}" class="col-12 text-center">
                     <div class="alert alert-light border text-muted py-5">
-                        No hay partidas públicas disponibles.
+                        No hay partidas publicas disponibles.
                     </div>
                 </div>
             </div>

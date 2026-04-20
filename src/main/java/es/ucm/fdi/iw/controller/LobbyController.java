@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.List;
+import java.util.Locale;
 
 @Controller
 public class LobbyController {
@@ -44,8 +45,17 @@ public class LobbyController {
     private UnoService unoService;
 
     @GetMapping("/lobby-select")
-    public String showSelector(Model model) {
-        model.addAttribute("publicLobbies", lobbyService.getPublicLobbies());
+    public String showSelector(@RequestParam(required = false, name = "q") String query,
+                               @RequestParam(required = false, defaultValue = "ALL") String mode,
+                               Model model) {
+        String normalizedMode = mode != null ? mode.trim().toUpperCase(Locale.ROOT) : "ALL";
+        if (!"ALL".equals(normalizedMode) && !lobbyService.getAvailableModes().contains(normalizedMode)) {
+            normalizedMode = "ALL";
+        }
+        model.addAttribute("publicLobbies", lobbyService.getPublicLobbies(query, normalizedMode));
+        model.addAttribute("searchQuery", query != null ? query : "");
+        model.addAttribute("selectedMode", normalizedMode);
+        model.addAttribute("availableModes", lobbyService.getAvailableModes());
         return "lobby-select";
     }
 
@@ -57,9 +67,24 @@ public class LobbyController {
         try {
             User user = (User) session.getAttribute("u");
             lobbyService.attemptJoin(code, password, user);
-            broadcastLobbyState(lobbyService.getLobbyByCode(code));
-            session.setAttribute("currentLobbyCode", code);
-            return "redirect:/lobby?code=" + code;
+            Game lobby = lobbyService.getLobbyByCode(code);
+            broadcastLobbyState(lobby);
+            session.setAttribute("currentLobbyCode", lobby.getCode());
+            return "redirect:/lobby?code=" + lobby.getCode();
+        } catch (LobbyException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/lobby-select";
+        }
+    }
+
+    @PostMapping("/lobbies/join-random")
+    public String joinRandomLobby(HttpSession session, RedirectAttributes ra) {
+        try {
+            User user = (User) session.getAttribute("u");
+            Game lobby = lobbyService.joinRandomPublicLobby(user);
+            broadcastLobbyState(lobby);
+            session.setAttribute("currentLobbyCode", lobby.getCode());
+            return "redirect:/lobby?code=" + lobby.getCode();
         } catch (LobbyException e) {
             ra.addFlashAttribute("error", e.getMessage());
             return "redirect:/lobby-select";
@@ -97,9 +122,10 @@ public class LobbyController {
 
         try {
             Game lobby = lobbyService.getLobbyByCode(lobbyCode);
+            String normalizedLobbyCode = lobby.getCode();
 
             if (lobby.getEstado() == Game.Estado.PARTIDA) {
-                return "redirect:/game?code=" + lobbyCode;
+                return "redirect:/game?code=" + normalizedLobbyCode;
             }
 
             User currentUser = (User) session.getAttribute("u");
@@ -111,9 +137,9 @@ public class LobbyController {
             model.addAttribute("players", players);
             model.addAttribute("isOwner", isOwner);
             model.addAttribute("maxPlayers", 4);
-            model.addAttribute("topics", "lobby/" + lobbyCode);
+            model.addAttribute("topics", "lobby/" + normalizedLobbyCode);
             model.addAttribute("currentUsername", currentUser != null ? currentUser.getUsername() : "");
-            session.setAttribute("currentLobbyCode", lobbyCode);
+            session.setAttribute("currentLobbyCode", normalizedLobbyCode);
         } catch (LobbyException e) {
             ra.addFlashAttribute("error", e.getMessage());
             return "redirect:/lobby-select";
