@@ -22,8 +22,8 @@ public class Game implements Transferable<Game.Transfer> {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen")
-    @SequenceGenerator(name = "gen", sequenceName = "gen")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "genl")
+    @SequenceGenerator(name = "genl", sequenceName = "GENL", allocationSize = 1)
     private long id;
 
     @Column(nullable = false, unique = true)
@@ -38,16 +38,12 @@ public class Game implements Transferable<Game.Transfer> {
     private User host;
 
     @ManyToMany
-    @JoinTable(
-        name = "lobby_players",
-        joinColumns = @JoinColumn(name = "lobby_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    
+    @JoinTable(name = "lobby_players", joinColumns = @JoinColumn(name = "lobby_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+
     private List<User> players = new ArrayList<>();
 
     @Column(columnDefinition = "TEXT")
-    private String estadoFinal; 
+    private String estadoFinal;
 
     private int mensaje;
 
@@ -68,7 +64,7 @@ public class Game implements Transferable<Game.Transfer> {
     @Transient // Esto no se guarda en la BD
     private UnoState unoState;
 
-// Método para verificar si la partida tiene lógica activa
+    // Método para verificar si la partida tiene lógica activa
     public void initUno() {
         this.unoState = new UnoState(this.players);
     }
@@ -76,11 +72,10 @@ public class Game implements Transferable<Game.Transfer> {
     @Override
     public Transfer toTransfer() {
         return new Transfer(
-            id, 
-            estadoFinal, 
-            code, 
-            winner != null ? winner.getUsername() : "N/A"
-        );
+                id,
+                estadoFinal,
+                code,
+                winner != null ? winner.getUsername() : "N/A");
     }
 
     @Override
@@ -89,8 +84,10 @@ public class Game implements Transferable<Game.Transfer> {
                 "id=" + id +
                 ", code=" + code +
                 ", winner=" + (winner != null ? winner.getUsername() : "none") +
-                ", estadoResumido='" + (estadoFinal != null && estadoFinal.length() > 50 ? 
-                                        estadoFinal.substring(0, 47) + "..." : estadoFinal) + '\'' +
+                ", estadoResumido='"
+                + (estadoFinal != null && estadoFinal.length() > 50 ? estadoFinal.substring(0, 47) + "..."
+                        : estadoFinal)
+                + '\'' +
                 '}';
     }
 

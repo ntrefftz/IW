@@ -23,6 +23,7 @@ import es.ucm.fdi.iw.model.Lorem;
 import es.ucm.fdi.iw.model.Message;
 import es.ucm.fdi.iw.model.Transferable;
 import es.ucm.fdi.iw.model.User;
+import es.ucm.fdi.iw.model.Game;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpServletRequest;
@@ -84,6 +85,23 @@ public class AdminController {
     target.setChatBan(!target.isChatBan());
     return "{\"chatBan\":" + target.isChatBan() + "}";
   }
+
+  @PostMapping("/closeGame/{id}")//WIP cerrar partida
+  @Transactional
+  @ResponseBody
+  public String closeGame(@PathVariable long id, Model model) {
+    log.info("Admin cierra partida" + id);
+    Game target = entityManager.find(Game.class, id);
+    return "{\"closeGame\":}";
+  }
+
+  @GetMapping("/viewChat/{id}")//WIP ver chat
+  @Transactional
+  public String viewChat(@PathVariable long id, Model model) {
+    Game target = entityManager.find(Game.class, id);
+    model.addAttribute("game", target);
+    return "chat";
+}
 
   /**
    * Returns JSON with all received messages

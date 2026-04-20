@@ -8,3 +8,5 @@ VALUES (2, TRUE, 'USER', 'b',
 
 -- start id numbering from a value that is larger than any assigned above
 ALTER SEQUENCE "PUBLIC"."GEN" RESTART WITH 1024;
+CREATE SEQUENCE IF NOT EXISTS "PUBLIC"."GENL" START WITH 1024;
+ALTER SEQUENCE "PUBLIC"."GENL" RESTART WITH 1024;

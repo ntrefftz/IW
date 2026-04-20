@@ -55,7 +55,6 @@
                         <th>Id</th>
                         <th>Nombre & Apellidos</th>
                         <th>Roles</th>
-                        <th>Grupos</th>
                         <th class="acciones">Acciones</th>
                     </tr>
                 </thead>
@@ -65,17 +64,19 @@
                         <td th:text="${user.username}"></td>
                         <td th:text="${user.roles}"></td>
                         <td>
-                            <form th:action="@{'/admin/toggle/' + ${user.id}}" th:method="post">
-                                <button th:if="${user.enabled}" type="submit"
-                                    class="toggle btn btn-danger">Deshabilitar</button>
-                                <button th:unless="${user.enabled}" type="submit"
-                                    class="toggle btn btn-primary">Habilitar</button>
+                            <form th:action="@{'/admin/toggle/' + ${user.id}}" th:method="post"
+                                style="display: inline-block;">
+                                <button type="submit" class="toggle btn btn-sm btn-outline-danger" aria-label="banear"
+                                    title="Banear">
+                                    <img th:src="${user.enabled} ? '/img/icons/user.svg' : '/img/icons/user_ban.svg'"
+                                        height="18px">
+                                </button>
                             </form>
-                        </td>
-                        <td>
-                            <form th:action="@{'/admin/chatBan/' + ${user.id}}" th:method="post">
-                                <button type="submit" class="chat-toggle btn btn-sm btn-outline-danger">
-                                    <img th:src="${user.chatBan} ? '/img/icons/chat.svg' : '/img/icons/chat_ban.svg'"
+                            <form th:action="@{'/admin/chatBan/' + ${user.id}}" th:method="post"
+                                style="display: inline-block;">
+                                <button type="submit" class="chat-toggle btn btn-sm btn-outline-danger"
+                                    aria-label="censurar" title="Censurar">
+                                    <img th:src="${user.chatBan} ? '/img/icons/mute.svg' : '/img/icons/voice.svg'"
                                         height="18px">
                                 </button>
                             </form>
@@ -90,6 +91,7 @@
                 class="tabla-Partidas table table-striped table-hover align-middle table-bordered">
                 <thead>
                     <tr>
+                        <th>Id</th>
                         <th>Codigo</th>
                         <th>Host</th>
                         <th>Visibilidad</th>
@@ -98,10 +100,25 @@
                 </thead>
                 <tbody>
                     <tr th:each="lobby : ${lobbies}">
+                        <td th:text="${lobby.id}"></td>
                         <td th:text="${lobby.code}"></td>
                         <td th:text="${lobby.host.username}"></td>
                         <td th:if="${lobby.privado}">Privado</td>
                         <td th:unless="${lobby.privado}">Publico</td>
+                        <td>
+                            <form th:action="@{'/admin/closeGame/' + ${lobby.id}}" th:method="post"
+                                style="display: inline-block;">
+                                <button type="submit" class="game-toggle btn btn-sm btn-outline-danger"
+                                    aria-label="cerrar partida" title="Cerrar partida">
+                                    <img th:src="@{/img/icons/ban.svg}" height="18px">
+                                </button>
+                            </form>
+                            <button th:onclick="'abrirChat(' + ${lobby.id} + ')'"
+                                class="chat-view btn btn-sm btn-outline-danger" aria-label="cerrar partida"
+                                title="Ver chat">
+                                <img th:src="@{/img/icons/chat.svg}" height="18px">
+                            </button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -123,16 +140,16 @@
         toggles.forEach(toggle => {
             toggle.addEventListener('click', (e) => {
                 e.preventDefault();
-                const form = e.target.parentElement;
-                go(form.action, 'POST').then((d) => {
-                    if (d.enabled) {
-                        e.target.classList.remove('btn-primary');
-                        e.target.classList.add('btn-danger');
-                        e.target.textContent = 'Deshabilitar';
+                const form = e.target.closest('form');
+                const img = form.querySelector('img');
+
+                go(form.action, 'POST').then((data) => {
+                    if (data.enabled) {
+                        img.src = '/img/icons/user.svg';
+                        console.log("Usuario baneado");
                     } else {
-                        e.target.classList.remove('btn-danger');
-                        e.target.classList.add('btn-primary');
-                        e.target.textContent = 'Habilitar';
+                        img.src = '/img/icons/user_ban.svg';
+                        console.log("Usuario desbaneado");
                     }
                     console.log(d);
                 });
@@ -148,10 +165,10 @@
 
                 go(form.action, 'POST').then((data) => {
                     if (data.chatBan) {
-                        img.src = '/img/icons/chat.svg';
+                        img.src = '/img/icons/mute.svg';
                         console.log("Usuario silenciado");
                     } else {
-                        img.src = '/img/icons/chat_ban.svg';
+                        img.src = '/img/icons/voice.svg';
                         console.log("Silencio levantado");
                     }
                 }).catch(err => {
@@ -159,33 +176,39 @@
                 });
             });
         });
+
+        function abrirChat(id) {
+            const url = '/viewChat/' + id;
+            const params = 'width=400,height=600,menubar=no,toolbar=no,location=no,status=no';
+            window.open(url, 'ChatPartida' + id, params);
+        }
     </script>
 
     <script type="module">
-        import { DataTable } from "../js/simple-datatables-10.js"
-        let dt = null;
-        function refreshMessages() {
-            go('/admin/all-messages', 'GET').then((d) => {
-                if (dt) {
-                    dt.destroy();
-                    document.querySelector("#messages").innerHTML = '';
-                }
-                dt = new DataTable('#messages', {
-                    data: {
-                        headings: ['from', 'to', 'text'],
-                        data: d
-                    },
-                    searchable: true,
-                    paging: false
+            import { DataTable } from "../js/simple-datatables-10.js"
+            let dt = null;
+            function refreshMessages() {
+                go('/admin/all-messages', 'GET').then((d) => {
+                    if (dt) {
+                        dt.destroy();
+                        document.querySelector("#messages").innerHTML = '';
+                    }
+                    dt = new DataTable('#messages', {
+                        data: {
+                            headings: ['from', 'to', 'text'],
+                            data: d
+                        },
+                        searchable: true,
+                        paging: false
+                    });
+                    dt.on("datatable.selectrow", (rowIndex, event, focused) => {
+                        event.preventDefault();
+                        console.log("click en fila: ", dataTable.data[rowIndex]);
+                    });
                 });
-                dt.on("datatable.selectrow", (rowIndex, event, focused) => {
-                    event.preventDefault();
-                    console.log("click en fila: ", dataTable.data[rowIndex]);
-                });
-            });
-        }
-        document.getElementById('refresh').addEventListener('click', refreshMessages);
-        refreshMessages();
+            }
+            document.getElementById('refresh').addEventListener('click', refreshMessages);
+            refreshMessages();
     </script>
 
     <script th:src="@{/js/admin.js}"></script>
