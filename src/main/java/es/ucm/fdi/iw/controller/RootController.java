@@ -77,8 +77,13 @@ public class RootController {
 
         try {
             Game game = lobbyService.getLobbyByCode(lobbyCode);
+            User currentUser = (User) session.getAttribute("u");
             model.addAttribute("lobbyCode", lobbyCode);
             model.addAttribute("playerNames", game.getPlayers().stream().map(User::getUsername).toList());
+            model.addAttribute("topics", "lobby/" + lobbyCode);
+            model.addAttribute("currentUsername", currentUser != null ? currentUser.getUsername() : "");
+            model.addAttribute("lobbyMode", game.getModalidad());
+            model.addAttribute("lobbyPrivate", game.isPrivado());
             return "game";
         } catch (LobbyException e) {
             ra.addFlashAttribute("error", e.getMessage());

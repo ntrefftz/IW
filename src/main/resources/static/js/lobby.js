@@ -1,24 +1,276 @@
-const btnPublica = document.querySelector("#p_publica");
-const btnPrivada = document.querySelector("#p_privada");
-const publicaContent = document.querySelector("#publica_content");
-const privadaContent = document.querySelector("#privada_content");
-const friends = document.querySelector("#friends");
-const addFriend = document.querySelector("#username");
+(() => {
+    const cfg = window.lobbyRealtimeConfig || {};
+    if (!cfg.code) {
+        return;
+    }
 
-const showPublica = () => {
-    publicaContent.classList.remove("d-none");
-    privadaContent.classList.add("d-none");
-};
+    const playersList = document.querySelector("#playersList");
+    const playerCountBadge = document.querySelector("#playerCountBadge");
+    const modeBadge = document.querySelector("#modeBadge");
+    const visibilityBadge = document.querySelector("#visibilityBadge");
+    const statusBadge = document.querySelector("#statusBadge");
 
-const showPrivada = () => {
-    privadaContent.classList.remove("d-none");
-    publicaContent.classList.add("d-none");
-};
+    const modalidadSelect = document.querySelector("#modalidad");
+    const publicoRadio = document.querySelector("#publico");
+    const privadoRadio = document.querySelector("#privado");
 
-btnPublica.onclick = e => {
-    showPublica();
-};
+    const ownerOnly = Array.from(document.querySelectorAll("[data-owner-only]"));
+    const ownerDisabled = Array.from(document.querySelectorAll("[data-owner-disabled]"));
 
-btnPrivada.onclick = e => {
-    showPrivada();
-};
+    const chatForm = document.querySelector("#lobbyChatForm");
+    const chatInput = document.querySelector("#lobbyChatInput");
+    const chatMessages = document.querySelector("#lobbyChatMessages");
+    const chatEmpty = document.querySelector("#lobbyChatEmpty");
+    const chatError = document.querySelector("#lobbyChatError");
+    const chatButton = chatForm ? chatForm.querySelector("button[type='submit']") : null;
+
+    const state = {
+        code: String(cfg.code),
+        currentUsername: cfg.currentUsername || "",
+        maxPlayers: Number.isInteger(cfg.maxPlayers) ? cfg.maxPlayers : 4,
+        host: "",
+        players: [],
+        modalidad: "UNO",
+        privado: false,
+        estado: "LOBBY"
+    };
+
+    function absolutePath(path) {
+        const base = (config && config.rootUrl ? config.rootUrl : "").replace(/\/+$/, "");
+        const normalized = path.startsWith("/") ? path : `/${path}`;
+        return `${base}${normalized}`;
+    }
+
+    function normalizeState(update) {
+        const incoming = update || {};
+        const players = Array.isArray(incoming.players)
+            ? incoming.players.map(name => (name || "Jugador sin nombre").toString())
+            : [];
+
+        return {
+            code: String(incoming.code || state.code),
+            host: (incoming.host || "").toString(),
+            players,
+            modalidad: (incoming.modalidad || "UNO").toString(),
+            privado: incoming.privado === true,
+            estado: (incoming.estado || "LOBBY").toString()
+        };
+    }
+
+    function applyLobbyState(update) {
+        const normalized = normalizeState(update);
+        state.code = normalized.code;
+        state.host = normalized.host;
+        state.players = normalized.players;
+        state.modalidad = normalized.modalidad;
+        state.privado = normalized.privado;
+        state.estado = normalized.estado;
+        renderLobbyState();
+
+        if (state.estado === "PARTIDA") {
+            redirectToGame();
+        }
+    }
+
+    function renderLobbyState() {
+        if (modeBadge) {
+            modeBadge.textContent = state.modalidad;
+        }
+        if (visibilityBadge) {
+            visibilityBadge.textContent = state.privado ? "Privada" : "Publica";
+        }
+        if (statusBadge) {
+            statusBadge.textContent = state.estado;
+        }
+        if (playerCountBadge) {
+            playerCountBadge.textContent = `Jugadores: ${state.players.length}/${state.maxPlayers}`;
+        }
+
+        if (modalidadSelect) {
+            modalidadSelect.value = state.modalidad;
+        }
+        if (publicoRadio) {
+            publicoRadio.checked = !state.privado;
+        }
+        if (privadoRadio) {
+            privadoRadio.checked = state.privado;
+        }
+
+        if (playersList) {
+            playersList.innerHTML = "";
+            for (let i = 0; i < state.maxPlayers; i += 1) {
+                const li = document.createElement("li");
+                li.className = "list-group-item d-flex justify-content-between align-items-center";
+
+                const playerName = state.players[i];
+                const nameSpan = document.createElement("span");
+                if (playerName) {
+                    nameSpan.textContent = playerName;
+                } else {
+                    nameSpan.textContent = "Esperando jugador...";
+                    nameSpan.className = "text-muted";
+                }
+                li.appendChild(nameSpan);
+
+                if (playerName && state.host && playerName === state.host) {
+                    const ownerBadge = document.createElement("span");
+                    ownerBadge.className = "badge text-bg-light border";
+                    ownerBadge.textContent = "Owner";
+                    li.appendChild(ownerBadge);
+                }
+
+                playersList.appendChild(li);
+            }
+        }
+
+        const isOwner = !!state.currentUsername && !!state.host && state.currentUsername === state.host;
+        ownerOnly.forEach(el => el.classList.toggle("d-none", !isOwner));
+        ownerDisabled.forEach(el => {
+            el.disabled = !isOwner;
+        });
+    }
+
+    function setChatError(message) {
+        if (!chatError) {
+            return;
+        }
+        if (message) {
+            chatError.textContent = message;
+            chatError.classList.remove("d-none");
+        } else {
+            chatError.textContent = "";
+            chatError.classList.add("d-none");
+        }
+    }
+
+    function formatTime(value) {
+        if (!value) {
+            return "";
+        }
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) {
+            return "";
+        }
+        return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function appendChatMessage(message) {
+        if (!chatMessages || !message) {
+            return;
+        }
+        if (chatEmpty) {
+            chatEmpty.remove();
+        }
+
+        const row = document.createElement("div");
+        row.className = "mb-2";
+
+        const header = document.createElement("div");
+        header.className = "small text-muted";
+        const author = (message.from || "Anonimo").toString();
+        const time = formatTime(message.sentAt);
+        header.textContent = time ? `${author} · ${time}` : author;
+
+        const text = document.createElement("div");
+        text.className = "small";
+        if (author === state.currentUsername) {
+            text.classList.add("text-primary");
+        }
+        text.textContent = (message.message || "").toString();
+
+        row.appendChild(header);
+        row.appendChild(text);
+        chatMessages.appendChild(row);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function redirectToGame(path) {
+        const finalPath = path || `/game?code=${encodeURIComponent(state.code)}`;
+        window.location.assign(absolutePath(finalPath));
+    }
+
+    function onWsMessage(message) {
+        if (!message || !message.type) {
+            return;
+        }
+        if (message.code && String(message.code) !== state.code) {
+            return;
+        }
+
+        if (message.type === "LOBBY_STATE_UPDATE") {
+            applyLobbyState(message);
+            return;
+        }
+
+        if (message.type === "LOBBY_CHAT_MESSAGE") {
+            appendChatMessage(message);
+            return;
+        }
+
+        if (message.type === "LOBBY_CHAT_REJECTED") {
+            setChatError(message.message || "No se pudo enviar el mensaje.");
+            return;
+        }
+
+        if (message.type === "GAME_START") {
+            redirectToGame(message.redirectPath || null);
+            return;
+        }
+
+        if (message.type === "LOBBY_CLOSED") {
+            window.location.assign(absolutePath("/lobby-select"));
+        }
+    }
+
+    function setupWsHook() {
+        if (!window.ws || typeof ws.receive !== "function") {
+            return;
+        }
+
+        const previousReceive = ws.receive;
+        ws.receive = (message) => {
+            previousReceive(message);
+            onWsMessage(message);
+        };
+    }
+
+    function submitChat(event) {
+        event.preventDefault();
+        if (!chatInput || !chatButton) {
+            return;
+        }
+
+        const text = chatInput.value.trim();
+        if (!text) {
+            return;
+        }
+
+        setChatError("");
+        chatInput.disabled = true;
+        chatButton.disabled = true;
+
+        go(absolutePath(`/api/lobbies/${encodeURIComponent(state.code)}/chat`), "POST", { message: text })
+            .then((response) => {
+                if (response && response.type === "LOBBY_CHAT_REJECTED") {
+                    setChatError(response.message || "No se pudo enviar el mensaje.");
+                    return;
+                }
+                chatInput.value = "";
+            })
+            .catch((e) => {
+                setChatError(e.text || "Error al enviar el mensaje");
+            })
+            .finally(() => {
+                chatInput.disabled = false;
+                chatButton.disabled = false;
+                chatInput.focus();
+            });
+    }
+
+    setupWsHook();
+    applyLobbyState(cfg.initialState || {});
+
+    if (chatForm) {
+        chatForm.addEventListener("submit", submitChat);
+    }
+})();

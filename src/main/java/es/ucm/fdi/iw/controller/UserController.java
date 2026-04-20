@@ -250,6 +250,8 @@ public class UserController {
   /** Por ahora lo comento pq los
    * Returns JSON with all received messages
    */ 
+
+  
   // @GetMapping(path = "received", produces = "application/json")
   // @Transactional // para no recibir resultados inconsistentes
   // @ResponseBody // para indicar que no devuelve vista, sino un objeto (jsonizado)
