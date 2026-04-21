@@ -2,12 +2,11 @@
 <html class="h-100" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <th:block th:replace="~{fragments/head :: header}" />
     <title>chat</title>
 </head>
 
 <body>
-    <div class="card border mt-3">
+    <div th:fragment="lobbyChat" class="card border mt-3">
         <div class="card-body">
             <h5 class="card-title mb-3">Chat del lobby</h5>
             <div id="lobbyChatMessages" class="border rounded p-3 bg-white" style="height: 220px; overflow-y: auto;">
@@ -25,6 +24,6 @@
     </div>
 </body>
 
-<script th:src="@{/js/game.js}" src="/js/game.js"></script>
+
 
 </html>

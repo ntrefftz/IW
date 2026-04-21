@@ -91,21 +91,7 @@
                         </div>
                     </div>
 
-                    <div class="card border-0 shadow-sm mt-4">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3">Chat del lobby</h5>
-                            <div id="lobbyChatMessages" class="border rounded p-3 bg-white" style="height: 240px; overflow-y: auto;">
-                                <p class="text-muted mb-0" id="lobbyChatEmpty">Todavía no hay mensajes. ¡Rompe el hielo!</p>
-                            </div>
-                            <form id="lobbyChatForm" class="mt-3">
-                                <div class="input-group">
-                                    <input id="lobbyChatInput" type="text" class="form-control" maxlength="400" placeholder="Escribe un mensaje..." autocomplete="off" required>
-                                    <button class="btn btn-primary" type="submit">Enviar</button>
-                                </div>
-                                <div id="lobbyChatError" class="text-danger small mt-2 d-none" role="alert"></div>
-                            </form>
-                        </div>
-                    </div>
+                    <div th:replace="~{fragments/chat :: lobbyChat}"></div>
 
                     <div class="d-flex gap-2 mt-4 justify-content-end">
                         <form data-owner-only th:classappend="${!isOwner} ? ' d-none' : ''" th:action="@{/lobby/start}" method="post" class="m-0">
@@ -145,6 +131,7 @@
         };
     </script>
     <script th:src="@{/js/lobby.js}" src="/js/lobby.js"></script>
+    <script th:src="@{/js/chat.js}" src="/js/chat.js"></script>
 </body>
 
 </html>
