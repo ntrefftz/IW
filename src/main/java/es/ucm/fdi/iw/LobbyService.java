@@ -2,9 +2,11 @@ package es.ucm.fdi.iw;
 
 import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -19,6 +21,8 @@ public class LobbyService {
     private static final List<String> AVAILABLE_MODES = List.of("UNO");
 
     private final List<Game> mockGames = new ArrayList<>();
+    @Autowired
+    private GameRepository gameRepository;
 
     public LobbyService() {
         User host = new User();
@@ -31,17 +35,18 @@ public class LobbyService {
         successGame.setEstado(Game.Estado.LOBBY);
         successGame.getPlayers().add(host);
         mockGames.add(successGame);
-
+        gameRepository.save(successGame);
+        
         Game fullGame = new Game();
         fullGame.setCode("LLENA99");
         fullGame.setPrivado(false);
         fullGame.setHost(host);
         fullGame.setEstado(Game.Estado.LOBBY);
-
+        
         for (int i = 0; i < MAX_PLAYERS; i++) {
             fullGame.getPlayers().add(new User());
         }
-        mockGames.add(fullGame);
+        mockGames.add(successGame);
     }
 
     public List<Game> getPublicLobbies() {
@@ -52,7 +57,7 @@ public class LobbyService {
         String normalizedQuery = normalizeSearchQuery(query);
         String normalizedMode = normalizeMode(mode);
 
-        return mockGames.stream()
+        return gameRepository.findAll().stream()
                 .filter(this::isPublicLobby)
                 .filter(g -> matchesSearch(g, normalizedQuery))
                 .filter(g -> matchesMode(g, normalizedMode))
@@ -64,7 +69,7 @@ public class LobbyService {
     }
 
     public List<Game> getLobbies() {
-        return mockGames;
+        return gameRepository.findAll();
     }
 
     public String createGame(User host) {
@@ -300,4 +305,9 @@ public class LobbyService {
 
         return a.getUsername() != null && a.getUsername().equals(b.getUsername());
     }
+}
+
+
+public interface GameRepository extends JpaRepository<Game, Long> {
+    Optional<Game> findByCode(String code);
 }

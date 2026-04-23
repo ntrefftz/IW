@@ -22,9 +22,8 @@ public class Game implements Transferable<Game.Transfer> {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "genl")
-    @SequenceGenerator(name = "genl", sequenceName = "GENL", allocationSize = 1)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String code;
@@ -55,7 +54,7 @@ public class Game implements Transferable<Game.Transfer> {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Transfer {
-        private long id;
+        private Long id;
         private String estadoFinal;
         private String code;
         private String winnerName;
