@@ -2,6 +2,8 @@ package es.ucm.fdi.iw;
 
 import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.User;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,33 +21,11 @@ public class LobbyService {
     private static final String MODE_ALL = "ALL";
     private static final List<String> AVAILABLE_MODES = List.of("UNO");
 
-    private final List<Game> mockGames = new ArrayList<>();
+    //private final List<Game> mockGames = new ArrayList<>();
     @Autowired
     private GameRepository gameRepository;
 
-    public LobbyService() {
-        User host = new User();
-        host.setUsername("MasterCard99");
-
-        Game successGame = new Game();
-        successGame.setCode("ABC123");
-        successGame.setPrivado(false);
-        successGame.setHost(host);
-        successGame.setEstado(Game.Estado.LOBBY);
-        successGame.getPlayers().add(host);
-        gameRepository.save(successGame);
-        
-        Game fullGame = new Game();
-        fullGame.setCode("LLENA99");
-        fullGame.setPrivado(false);
-        fullGame.setHost(host);
-        fullGame.setEstado(Game.Estado.LOBBY);
-        
-        for (int i = 0; i < MAX_PLAYERS; i++) {
-            fullGame.getPlayers().add(new User());
-        }
-        gameRepository.save(successGame);
-    }
+    public LobbyService() {}
 
     public List<Game> getPublicLobbies() {
         return getPublicLobbies(null, MODE_ALL);
@@ -55,7 +35,7 @@ public class LobbyService {
         String normalizedQuery = normalizeSearchQuery(query);
         String normalizedMode = normalizeMode(mode);
 
-        return gameRepository.findAll().stream()
+        return getLobbies().stream()
                 .filter(this::isPublicLobby)
                 .filter(g -> matchesSearch(g, normalizedQuery))
                 .filter(g -> matchesMode(g, normalizedMode))
@@ -85,9 +65,9 @@ public class LobbyService {
         return randomCode;
     }
 
-    public Game getLobbyByCode(String code) {
+    public Game getLobbyByCode(String code) {//Esto lo quiero cambiar para que sea mas eficiente pero de momento lo dejo asi
         String normalizedCode = normalizeCode(code);
-        return mockGames.stream()
+        return getLobbies().stream()
                 .filter(g -> g.getCode().equals(normalizedCode))
                 .findFirst()
                 .orElseThrow(() -> new LobbyException("Partida no encontrada"));
@@ -124,7 +104,7 @@ public class LobbyService {
             throw new LobbyException("Debes iniciar sesion para unirte a la sala");
         }
 
-        List<Game> candidates = mockGames.stream()
+        List<Game> candidates = getLobbies().stream()
                 .filter(this::isJoinablePublicLobby)
                 .collect(Collectors.toList());
 
@@ -177,7 +157,7 @@ public class LobbyService {
 
         if (isOwner(game, user)) {
             if (game.getPlayers().isEmpty()) {
-                mockGames.remove(game);
+                gameRepository.delete(game);
             } else {
                 game.setHost(game.getPlayers().get(0));
             }
@@ -191,7 +171,7 @@ public class LobbyService {
             throw new LobbyException("Solo el owner puede cerrar el lobby");
         }
 
-        mockGames.remove(game);
+        getLobbies().remove(game);
     }
 
     public void startLobby(String code, User user) {
@@ -216,7 +196,7 @@ public class LobbyService {
         while (true) {
             String candidate = UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase(Locale.ROOT);
             boolean exists = false;
-            for (Game game : mockGames) {
+            for (Game game : getLobbies()) {
                 if (candidate.equals(game.getCode())) {
                     exists = true;
                     break;
