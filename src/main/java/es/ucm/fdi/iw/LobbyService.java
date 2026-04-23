@@ -275,10 +275,9 @@ public class LobbyService {
 
         String code = game.getCode() != null ? game.getCode().toLowerCase(Locale.ROOT) : "";
         String host = game.getHost() != null && game.getHost().getUsername() != null
-                ? game.getHost().getUsername().toLowerCase(Locale.ROOT)
-                : "";
+                ? game.getHost().getUsername().toLowerCase(Locale.ROOT): "";
 
-        return code.contains(query) || host.contains(query);
+        return host.equals(query);
     }
 
     private boolean matchesMode(Game game, String mode) {
