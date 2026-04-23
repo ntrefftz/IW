@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -34,7 +33,6 @@ public class LobbyService {
         successGame.setHost(host);
         successGame.setEstado(Game.Estado.LOBBY);
         successGame.getPlayers().add(host);
-        mockGames.add(successGame);
         gameRepository.save(successGame);
         
         Game fullGame = new Game();
@@ -46,7 +44,7 @@ public class LobbyService {
         for (int i = 0; i < MAX_PLAYERS; i++) {
             fullGame.getPlayers().add(new User());
         }
-        mockGames.add(successGame);
+        gameRepository.save(successGame);
     }
 
     public List<Game> getPublicLobbies() {
@@ -83,7 +81,7 @@ public class LobbyService {
         newGame.setModalidad("UNO");
         newGame.getPlayers().add(host);
 
-        mockGames.add(newGame);
+        gameRepository.save(newGame);
         return randomCode;
     }
 
@@ -305,9 +303,4 @@ public class LobbyService {
 
         return a.getUsername() != null && a.getUsername().equals(b.getUsername());
     }
-}
-
-
-public interface GameRepository extends JpaRepository<Game, Long> {
-    Optional<Game> findByCode(String code);
 }
