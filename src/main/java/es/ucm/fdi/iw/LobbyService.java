@@ -168,7 +168,7 @@ public class LobbyService {
         Game game = getLobbyByCode(code);
 
         if (!isOwner(game, user)) {
-            throw new LobbyException("Solo el owner puede cerrar el lobby");
+            throw new LobbyException("Solo el owner o un admin pueden cerrar el lobby");
         }
 
         getLobbies().remove(game);

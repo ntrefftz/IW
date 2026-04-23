@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.ucm.fdi.iw.model.Topic;
 import es.ucm.fdi.iw.LobbyService;
@@ -46,11 +47,14 @@ public class AdminController {
   private EntityManager entityManager;
 
   @Autowired
-    private LobbyService lobbyService;
+  private LobbyService lobbyService;
+
+  @Autowired
+  private LobbyController lobbyController;
 
   @ModelAttribute
   public void populateModel(HttpSession session, Model model) {
-    for (String name : new String[] { "u", "url", "ws", "topics"}) {
+    for (String name : new String[] { "u", "url", "ws", "topics" }) {
       model.addAttribute(name, session.getAttribute(name));
     }
   }
@@ -86,22 +90,38 @@ public class AdminController {
     return "{\"chatBan\":" + target.isChatBan() + "}";
   }
 
-  @PostMapping("/closeGame/{id}")//WIP cerrar partida
+  @PostMapping("/closeGame/{code}") // WIP cerrar partida
   @Transactional
   @ResponseBody
-  public String closeGame(@PathVariable long id, Model model) {
-    log.info("Admin cierra partida" + id);
-    Game target = entityManager.find(Game.class, id);
-    return "{\"closeGame\":}";
+  public String closeGame(@PathVariable String code) {
+    log.info("Admin forzando cierre de partida: " + code);
+
+    try {
+
+      Game lobby = lobbyService.getLobbyByCode(code);
+        if (lobby == null) {
+            log.warn("El lobby {} no existe", code);
+            return "{\"status\": \"error\", \"message\": \"Lobby no encontrado\"}";
+        }
+
+        lobbyService.closeLobby(code, lobby.getHost()); 
+        
+        lobbyController.broadcastLobbyClosed(code);
+
+      return "{\"status\": \"success\", \"code\": \"" + code + "\"}";
+    } catch (Exception e) {
+      log.error("ERROR CRÍTICO AL CERRAR PARTIDA: ", e);
+      return "{\"status\": \"error\", \"message\": \"No se pudo cerrar la partida\"}";
+    }
   }
 
-  @GetMapping("/viewChat/{id}")//WIP ver chat
+  @GetMapping("/viewChat/{id}") // WIP ver chat
   @Transactional
   public String viewChat(@PathVariable long id, Model model) {
     Game target = entityManager.find(Game.class, id);
     model.addAttribute("game", target);
     return "chat";
-}
+  }
 
   /**
    * Returns JSON with all received messages
@@ -139,15 +159,15 @@ public class AdminController {
       u.setUsername("user" + i);
       u.setPassword(passwordEncoder
           .encode("aa"));
-            //UserController.generateRandomBase64Token(9)));
+      // UserController.generateRandomBase64Token(9)));
       u.setEnabled(true);
       u.setRoles(User.Role.USER.toString());
       entityManager.persist(u);
-      if (i%2 == 0) {
+      if (i % 2 == 0) {
         g1.getMembers().add(u);
         // u.getTopics().add(g1); NO FUNCIONA: propietario es g, no u
       }
-      if (i%3 == 0) {
+      if (i % 3 == 0) {
         g2.getMembers().add(u);
       }
     }

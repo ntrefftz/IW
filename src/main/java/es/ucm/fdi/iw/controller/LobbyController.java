@@ -249,7 +249,7 @@ public class LobbyController {
         messagingTemplate.convertAndSend("/topic/lobby/" + lobby.getCode(), buildLobbyStateMessage(lobby));
     }
 
-    private void broadcastLobbyClosed(String code) {
+    public void broadcastLobbyClosed(String code) {
         ObjectNode msg = objectMapper.createObjectNode();
         msg.put("type", "LOBBY_CLOSED");
         msg.put("code", code);

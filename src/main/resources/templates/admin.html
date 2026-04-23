@@ -106,7 +106,7 @@
                         <td th:if="${lobby.privado}">Privado</td>
                         <td th:unless="${lobby.privado}">Publico</td>
                         <td>
-                            <form th:action="@{'/admin/closeGame/' + ${lobby.id}}" th:method="post"
+                            <form th:action="@{'/admin/closeGame/' + ${lobby.code}}" th:method="post"
                                 style="display: inline-block;">
                                 <button type="submit" class="game-toggle btn btn-sm btn-outline-danger"
                                     aria-label="cerrar partida" title="Cerrar partida">

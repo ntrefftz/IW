@@ -52,3 +52,23 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
 });
+
+document.querySelectorAll('.btn-close-game').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const form = e.target.closest('form');
+        const fila = e.target.closest('tr');
+
+        if (confirm("¿Cerrar esta partida y expulsar a todos los jugadores?")) {
+            go(form.action, 'POST').then(data => {
+                if (data.status === 'success') {
+                    fila.style.transition = "all 0.5s";
+                    fila.style.opacity = "0";
+                    setTimeout(() => fila.remove(), 500);
+                } else {
+                    alert("Error: " + data.message);
+                }
+            });
+        }
+    });
+});
