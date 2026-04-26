@@ -21,11 +21,12 @@ public class LobbyService {
     private static final String MODE_ALL = "ALL";
     private static final List<String> AVAILABLE_MODES = List.of("UNO");
 
-    //private final List<Game> mockGames = new ArrayList<>();
+    // private final List<Game> mockGames = new ArrayList<>();
     @Autowired
     private GameRepository gameRepository;
 
-    public LobbyService() {}
+    public LobbyService() {
+    }
 
     public List<Game> getPublicLobbies() {
         return getPublicLobbies(null, MODE_ALL);
@@ -65,7 +66,8 @@ public class LobbyService {
         return randomCode;
     }
 
-    public Game getLobbyByCode(String code) {//Esto lo quiero cambiar para que sea mas eficiente pero de momento lo dejo asi
+    public Game getLobbyByCode(String code) {// Esto lo quiero cambiar para que sea mas eficiente pero de momento lo
+                                             // dejo asi
         String normalizedCode = normalizeCode(code);
         return getLobbies().stream()
                 .filter(g -> g.getCode().equals(normalizedCode))
@@ -165,13 +167,15 @@ public class LobbyService {
     }
 
     public void closeLobby(String code, User user) {
-        Game game = getLobbyByCode(code);
+        // Game game = getLobbyByCode(code);
+        Game game = gameRepository.findByCode(normalizeCode(code))
+                .orElseThrow(() -> new LobbyException("Partida no encontrada"));
 
         if (!isOwner(game, user)) {
             throw new LobbyException("Solo el owner o un admin pueden cerrar el lobby");
         }
 
-        getLobbies().remove(game);
+        gameRepository.delete(game);
     }
 
     public void startLobby(String code, User user) {

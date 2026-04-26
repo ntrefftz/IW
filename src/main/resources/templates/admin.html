@@ -108,13 +108,13 @@
                         <td>
                             <form th:action="@{'/admin/closeGame/' + ${lobby.code}}" th:method="post"
                                 style="display: inline-block;">
-                                <button type="submit" class="game-toggle btn btn-sm btn-outline-danger"
+                                <button type="submit" class="btn-close-game game-toggle btn btn-sm btn-outline-danger"
                                     aria-label="cerrar partida" title="Cerrar partida">
                                     <img th:src="@{/img/icons/ban.svg}" height="18px">
                                 </button>
                             </form>
                             <button th:onclick="'abrirChat(' + ${lobby.id} + ')'"
-                                class="chat-view btn btn-sm btn-outline-danger" aria-label="cerrar partida"
+                                class="chat-view btn btn-sm btn-outline-danger " aria-label="cerrar partida"
                                 title="Ver chat">
                                 <img th:src="@{/img/icons/chat.svg}" height="18px">
                             </button>
