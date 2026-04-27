@@ -2,10 +2,11 @@ package es.ucm.fdi.iw;
 
 import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.User;
+import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Service;
+import org.springframework.satereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-@Service
+@org.springframework.stereotype.Service
 public class LobbyService {
 
     private static final int MAX_PLAYERS = 4;
@@ -51,6 +52,7 @@ public class LobbyService {
         return gameRepository.findAll();
     }
 
+    @Transactional
     public String createGame(User host) {
         Game newGame = new Game();
         String randomCode = generateUniqueCode();
@@ -75,6 +77,7 @@ public class LobbyService {
                 .orElseThrow(() -> new LobbyException("Partida no encontrada"));
     }
 
+    @Transactional 
     public void attemptJoin(String code, String password, User user) throws LobbyException {
         Game game = getLobbyByCode(code);
 
@@ -99,6 +102,7 @@ public class LobbyService {
         }
 
         game.getPlayers().add(user);
+        gameRepository.save(game);
     }
 
     public Game joinRandomPublicLobby(User user) {
@@ -130,6 +134,7 @@ public class LobbyService {
         return game.getPlayers().stream().anyMatch(p -> sameUser(p, user));
     }
 
+    @Transactional
     public void updateLobbySettings(String code, User user, String modalidad, boolean privado) {
         Game game = getLobbyByCode(code);
 
@@ -148,6 +153,7 @@ public class LobbyService {
         }
     }
 
+    @Transactional
     public void leaveLobby(String code, User user) {
         Game game = getLobbyByCode(code);
 
@@ -166,6 +172,7 @@ public class LobbyService {
         }
     }
 
+    @Transactional
     public void closeLobby(String code, User user) {
         // Game game = getLobbyByCode(code);
         Game game = gameRepository.findByCode(normalizeCode(code))
@@ -178,6 +185,7 @@ public class LobbyService {
         gameRepository.delete(game);
     }
 
+    @Transactional
     public void startLobby(String code, User user) {
         Game game = getLobbyByCode(code);
 
