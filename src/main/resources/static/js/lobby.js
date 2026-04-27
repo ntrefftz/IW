@@ -32,8 +32,10 @@
         players: [],
         modalidad: "UNO",
         privado: false,
-        estado: "LOBBY"
+        estado: "LOBBY",
+        redirecting: false
     };
+    let lobbyPollingId = null;
 
     function absolutePath(path) {
         const base = (config && config.rootUrl ? config.rootUrl : "").replace(/\/+$/, "");
@@ -55,6 +57,13 @@
             privado: incoming.privado === true,
             estado: (incoming.estado || "LOBBY").toString()
         };
+    }
+
+    function sameLobbyCode(a, b) {
+        if (!a || !b) {
+            return false;
+        }
+        return String(a).trim().toUpperCase() === String(b).trim().toUpperCase();
     }
 
     function applyLobbyState(update) {
@@ -185,20 +194,59 @@
     }
 
     function redirectToGame(path) {
+        if (state.redirecting) {
+            return;
+        }
+        state.redirecting = true;
+        if (lobbyPollingId !== null) {
+            window.clearInterval(lobbyPollingId);
+            lobbyPollingId = null;
+        }
         const finalPath = path || `/game?code=${encodeURIComponent(state.code)}`;
         window.location.assign(absolutePath(finalPath));
+    }
+
+    function pollLobbyState() {
+        if (!state.code || state.redirecting) {
+            return;
+        }
+
+        go(absolutePath(`/api/games/${encodeURIComponent(state.code)}/state`), "GET")
+            .then((response) => {
+                if (response && response.type === "GAME_STATE_UPDATE") {
+                    const targetCode = response.code ? String(response.code) : state.code;
+                    redirectToGame(`/game?code=${encodeURIComponent(targetCode)}`);
+                }
+            })
+            .catch(() => {
+                // Aun no hay estado de partida disponible o ha fallado temporalmente.
+            });
+    }
+
+    function startLobbyPolling() {
+        if (lobbyPollingId !== null || !state.code) {
+            return;
+        }
+        pollLobbyState();
+        lobbyPollingId = window.setInterval(pollLobbyState, 1500);
     }
 
     function onWsMessage(message) {
         if (!message || !message.type) {
             return;
         }
-        if (message.code && String(message.code) !== state.code) {
+        if (message.code && !sameLobbyCode(message.code, state.code)) {
             return;
         }
 
         if (message.type === "LOBBY_STATE_UPDATE") {
             applyLobbyState(message);
+            return;
+        }
+
+        if (message.type === "GAME_STATE_UPDATE") {
+            const targetCode = message.code ? String(message.code) : state.code;
+            redirectToGame(`/game?code=${encodeURIComponent(targetCode)}`);
             return;
         }
 
@@ -269,6 +317,7 @@
 
     setupWsHook();
     applyLobbyState(cfg.initialState || {});
+    startLobbyPolling();
 
     if (chatForm) {
         chatForm.addEventListener("submit", submitChat);

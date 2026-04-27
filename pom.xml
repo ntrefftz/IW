@@ -12,7 +12,7 @@
 	<artifactId>Frenemies</artifactId>		<!-- cambia esto -->
 	<version>0.0.1-SNAPSHOT</version>		
 	<name>Frenemies</name>				<!-- cambia esto -->
-	<description>PJuego de Frenemies</description>	<!-- cambia esto -->
+	<description>Juego de Frenemies</description>	<!-- cambia esto -->
 	<url/>
 	<licenses>
 		<license/>
