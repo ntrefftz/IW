@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -98,6 +99,9 @@ public class UnoApiController {
             }
 
             return requesterView;
+        } catch (ObjectOptimisticLockingFailureException e) {
+            response.setStatus(HttpServletResponse.SC_CONFLICT);
+            return error("CONCURRENT_UPDATE", "La partida se actualizo en paralelo. Reintenta la accion");
         } catch (LobbyException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return error("INVALID_ACTION", e.getMessage());

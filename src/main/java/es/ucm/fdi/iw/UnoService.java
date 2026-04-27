@@ -5,7 +5,9 @@ import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.UnoActionRequest;
 import es.ucm.fdi.iw.model.UnoState;
 import es.ucm.fdi.iw.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,9 +21,13 @@ import java.util.stream.Collectors;
 @Service
 public class UnoService {
 
+    @Autowired
+    private GameRepository gameRepository;
+
     /**
      * Inicializa una partida de UNO estándar
      */
+    @Transactional
     public void prepareGame(Game game) {
         game.initUno(); 
         UnoState state = game.getUnoState();
@@ -42,6 +48,7 @@ public class UnoService {
         state.getDiscardPile().add(state.getDeck().remove(0));
 
         state.setCurrentTurnId(game.getHost().getId());
+        gameRepository.save(game);
     }
 
     public User resolvePlayerInGame(Game game, User sessionUser) {
@@ -52,6 +59,7 @@ public class UnoService {
         return game.getPlayers().stream().filter(p -> sameUser(p, sessionUser)).findFirst().orElse(null);
     }
 
+    @Transactional
     public void applyAction(Game game, User actor, UnoActionRequest req) {
         UnoState state = requireState(game);
         User realActor = resolvePlayerInGame(game, actor);
@@ -78,6 +86,8 @@ public class UnoService {
             case PASS -> advanceTurn(game, state, realActor.getId(), 1);
             default -> throw new LobbyException("Accion no soportada");
         }
+
+        gameRepository.save(game);
     }
 
     private List<Card> generateStandardDeck() {

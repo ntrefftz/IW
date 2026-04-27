@@ -1,5 +1,6 @@
 package es.ucm.fdi.iw.model;
 
+import es.ucm.fdi.iw.model.converters.UnoStateConverter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -24,6 +25,9 @@ public class Game implements Transferable<Game.Transfer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Version
+    private Long version;
 
     @Column(nullable = false, unique = true)
     private String code;
@@ -60,7 +64,9 @@ public class Game implements Transferable<Game.Transfer> {
         private String winnerName;
     }
 
-    @Transient // Esto no se guarda en la BD
+    @Lob
+    @Column(name = "uno_state_json", columnDefinition = "CLOB")
+    @Convert(converter = UnoStateConverter.class)
     private UnoState unoState;
 
     // Método para verificar si la partida tiene lógica activa

@@ -1,9 +1,11 @@
 package es.ucm.fdi.iw.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.util.*;
 
 @Data
+@NoArgsConstructor
 /*
 * Estado interno de la partida
 */
