@@ -1,5 +1,6 @@
 package es.ucm.fdi.iw.controller;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +17,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.ucm.fdi.iw.LobbyException;
 import es.ucm.fdi.iw.LobbyService;
 import es.ucm.fdi.iw.model.Game;
+import es.ucm.fdi.iw.model.Message;
 import es.ucm.fdi.iw.model.User;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
+
 
 @RestController
 @RequestMapping("/api/lobbies")
@@ -33,6 +38,10 @@ public class LobbyApiController {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private EntityManager entityManager;
+
+    @Transactional
     @PostMapping("/{code}/chat")
     public ObjectNode chat(@PathVariable String code,
             @RequestBody ObjectNode payload,
@@ -74,6 +83,14 @@ public class LobbyApiController {
             msg.put("sentAt", OffsetDateTime.now().toString());
 
             messagingTemplate.convertAndSend("/topic/lobby/" + code, msg);
+
+            Message m = new Message();
+            m.setGame(lobby);
+            m.setDateSent(LocalDateTime.now());
+            m.setText(text);
+            m.setSender(currentUser);
+            entityManager.persist(m);
+
             return msg;
         } catch (LobbyException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
