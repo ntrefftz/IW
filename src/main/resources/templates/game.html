@@ -15,19 +15,19 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                         <div>
-                            <h1 class="h4 mb-1">Partida UNO (Paso 1)</h1>
+                            <h1 class="h4 mb-1">Partida UNO</h1>
                             <p class="text-muted mb-0">
                                 <span th:text="${'Lobby: ' + lobbyCode}">Lobby: ABC123</span>
                                 <span id="gameModeBadge" class="badge text-bg-primary ms-2" th:text="${lobbyMode}">UNO</span>
                                 <span id="gameVisibilityBadge" class="badge text-bg-dark" th:text="${lobbyPrivate ? 'Privada' : 'Publica'}">Publica</span>
                             </p>
                         </div>
-                        <a th:href="@{/lobby(code=${lobbyCode})}" class="btn btn-light btn-sm border">Volver al lobby</a>
+                        <a th:href="@{/lobby(code=${lobbyCode})}" class="btn btn-light btn-sm border">Volver a sala de espera</a>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <div class="border rounded p-2">
+                            <div id="turnBox" class="border rounded p-2">
                                 <strong>Turno:</strong> <span id="turnLabel">-</span>
                             </div>
                         </div>
@@ -38,7 +38,7 @@
                         </div>
                     </div>
 
-                    <div class="alert alert-secondary py-2 mb-3" id="gameMessage" role="status">
+                    <div class="alert alert-secondary py-2 mb-3 fw-semibold" id="gameMessage" role="status">
                         Pulsa una carta valida de tu mano o el mazo para robar.
                     </div>
 

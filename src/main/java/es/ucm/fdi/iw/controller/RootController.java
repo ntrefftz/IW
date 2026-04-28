@@ -77,6 +77,9 @@ public class RootController {
 
         try {
             Game game = lobbyService.getLobbyByCode(lobbyCode);
+            if (game.getEstado() != Game.Estado.PARTIDA) {
+                return "redirect:/lobby?code=" + game.getCode();
+            }
             User currentUser = (User) session.getAttribute("u");
             model.addAttribute("lobbyCode", lobbyCode);
             model.addAttribute("playerNames", game.getPlayers().stream().map(User::getUsername).toList());

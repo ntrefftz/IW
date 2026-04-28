@@ -128,8 +128,13 @@ public class UnoService {
         ObjectNode root = mapper.createObjectNode();
         root.put("type", "GAME_STATE_UPDATE");
         root.put("code", game.getCode());
+        root.put("gameStatus", game.getEstado().name());
         root.put("currentTurnId", state.getCurrentTurnId());
         root.put("clockwise", state.isClockwise());
+        root.put("currentTurnUsername", resolveUsernameById(game.getPlayers(), state.getCurrentTurnId()));
+
+        User winner = game.getWinner();
+        root.put("winnerUsername", winner != null && winner.getUsername() != null ? winner.getUsername() : "");
 
         Card topCard = state.getDiscardPile().get(state.getDiscardPile().size() - 1);
         String topCode = cardCode(topCard);
@@ -195,6 +200,18 @@ public class UnoService {
         }
 
         return root;
+    }
+
+    @Transactional
+    public void resetToLobbyAfterGame(Game game) {
+        if (game == null) {
+            return;
+        }
+
+        game.setEstado(Game.Estado.LOBBY);
+        game.setWinner(null);
+        game.setUnoState(null);
+        gameRepository.save(game);
     }
 
     private UnoState requireState(Game game) {
@@ -360,5 +377,14 @@ public class UnoService {
             return a.getId() == b.getId();
         }
         return a.getUsername() != null && a.getUsername().equals(b.getUsername());
+    }
+
+    private String resolveUsernameById(List<User> players, long playerId) {
+        for (User player : players) {
+            if (player.getId() == playerId) {
+                return player.getUsername() != null ? player.getUsername() : "";
+            }
+        }
+        return "";
     }
 }
