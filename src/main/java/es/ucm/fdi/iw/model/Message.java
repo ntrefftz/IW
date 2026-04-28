@@ -25,9 +25,9 @@ import lombok.AllArgsConstructor;
  */
 @Entity
 @NamedQueries({
-	@NamedQuery(name="Message.countUnread",
-	query="SELECT COUNT(m) FROM Message m "
-			+ "WHERE m.recipient.id = :userId AND m.dateRead = null")
+	// @NamedQuery(name="Message.searchByLobby",
+	// query="SELECT COUNT(m) FROM Message m "
+	// 		+ "WHERE m.recipient.id = :userId AND m.dateRead = null")
 })
 @Data
 public class Message implements Transferable<Message.Transfer> {
