@@ -41,14 +41,11 @@ public class Message implements Transferable<Message.Transfer> {
 	@ManyToOne
 	private User sender;
 	@ManyToOne
-	private User recipient;
-  @ManyToOne
-	private Topic topic;
+	private Game game;
   
 	private String text;
 	
 	private LocalDateTime dateSent;
-	private LocalDateTime dateRead;
 	
 	/**
 	 * Objeto para persistir a/de JSON
@@ -57,21 +54,16 @@ public class Message implements Transferable<Message.Transfer> {
     @Getter
     @AllArgsConstructor
 	public static class Transfer {
-		private String from;
-		private String to;
-		private String sent;
-		private String received;
-    private String topic;
+		private String sender;
+    	private String game;
 		private String text;
+		private String date;
 		long id;
 		public Transfer(Message m) {
-			this.from = m.getSender().getUsername();
-			this.to = m.getRecipient() == null ? "null": m.getRecipient().getUsername();
-			this.topic = m.getTopic() == null ? "null": m.getTopic().getName();
-			this.sent = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(m.getDateSent());
-			this.received = m.getDateRead() == null ?
-					null : DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(m.getDateRead());
-			this.text = m.getText();
+			this.sender = m.getSender().getUsername();
+			this.game = m.getGame().getCode() == null ? "null":  m.getGame().getCode() ;
+			this.text = m.getText() == null ? "null": m.getText();
+			this.date = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(m.getDateSent());
 			this.id = m.getId();
 		}
 	}
