@@ -1,10 +1,12 @@
 package es.ucm.fdi.iw;
 
 import es.ucm.fdi.iw.model.Card;
+import es.ucm.fdi.iw.model.Friendship;
 import es.ucm.fdi.iw.model.Game;
 import es.ucm.fdi.iw.model.UnoActionRequest;
 import es.ucm.fdi.iw.model.UnoState;
 import es.ucm.fdi.iw.model.User;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,9 @@ public class UnoService {
 
     @Autowired
     private GameRepository gameRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     /**
      * Inicializa una partida de UNO estándar
@@ -239,6 +244,16 @@ public class UnoService {
 
         hand.remove(played);
 
+        if (played.getSymbol() == Card.Symbol.DRAW_TWO) {
+            actor.setDrawTwoPlayed(actor.getDrawTwoPlayed() + 1);
+        }
+        if (played.getSymbol() == Card.Symbol.DRAW_FOUR) {
+            actor.setDrawFourPlayed(actor.getDrawFourPlayed() + 1);
+        }
+        if (hand.size() == 1) {
+            actor.setOneCardMoments(actor.getOneCardMoments() + 1);
+        }
+
         Card toDiscard = played;
         if (played.getSymbol() == Card.Symbol.CHANGE || played.getSymbol() == Card.Symbol.DRAW_FOUR) {
             Card.Color chosen = parseChosenColor(req.getChosenColor());
@@ -269,6 +284,15 @@ public class UnoService {
             List<Card> targetHand = state.getHands().get(targetId);
             for (int i = 0; i < n; i++) {
                 targetHand.add(drawFromDeck(state));
+            }
+            User targetUser = entityManager.find(User.class, targetId);
+            if (targetUser != null) {
+                if (played.getSymbol() == Card.Symbol.DRAW_TWO) {
+                    targetUser.setDrawTwoDrawn(targetUser.getDrawTwoDrawn() + 1);
+                } else {
+                    targetUser.setDrawFourDrawn(targetUser.getDrawFourDrawn() + 1);
+                }
+                incrementFriendshipBetrayal(actor, targetUser);
             }
             steps = 2;
         }
@@ -377,6 +401,24 @@ public class UnoService {
             return a.getId() == b.getId();
         }
         return a.getUsername() != null && a.getUsername().equals(b.getUsername());
+    }
+
+    private void incrementFriendshipBetrayal(User a, User b) {
+        Friendship friendship = entityManager.createQuery(
+                "SELECT f FROM Friendship f WHERE (f.player1 = :a AND f.player2 = :b) "
+                        + "OR (f.player1 = :b AND f.player2 = :a)",
+                Friendship.class)
+                .setParameter("a", a)
+                .setParameter("b", b)
+                .setMaxResults(1)
+                .getResultList()
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        if (friendship != null) {
+            friendship.setTimesBetrayed(friendship.getTimesBetrayed() + 1);
+        }
     }
 
     private String resolveUsernameById(List<User> players, long playerId) {

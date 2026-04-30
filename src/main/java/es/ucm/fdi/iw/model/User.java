@@ -46,6 +46,11 @@ public class User implements Transferable<User.Transfer> {
   private int numVictorias;
   private int numDerrotas;
   private boolean chatBan = false; // baneo de chat
+  private int drawTwoPlayed;
+  private int drawFourPlayed;
+  private int drawTwoDrawn;
+  private int drawFourDrawn;
+  private int oneCardMoments;
   
   /**
    * Checks whether this user has a given role.
@@ -68,12 +73,29 @@ public class User implements Transferable<User.Transfer> {
     private String password;
     private String roles;
     private boolean chatBan;
+    private int drawTwoPlayed;
+    private int drawFourPlayed;
+    private int drawTwoDrawn;
+    private int drawFourDrawn;
+    private int oneCardMoments;
   }
 
   @Override
   public Transfer toTransfer() {
     
-    return new Transfer(id, username, numDerrotas, numVictorias, password, roles, chatBan);
+    return new Transfer(
+        id,
+        username,
+        numDerrotas,
+        numVictorias,
+        password,
+        roles,
+        chatBan,
+        drawTwoPlayed,
+        drawFourPlayed,
+        drawTwoDrawn,
+        drawFourDrawn,
+        oneCardMoments);
   }
 
   @Override

@@ -6,6 +6,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -29,6 +31,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.ucm.fdi.iw.model.Topic;
 import es.ucm.fdi.iw.model.Message;
+import es.ucm.fdi.iw.model.FriendRequest;
+import es.ucm.fdi.iw.model.Friendship;
 import es.ucm.fdi.iw.model.User;
 import es.ucm.fdi.iw.model.User.Role;
 import io.karatelabs.js.Context;
@@ -131,6 +135,39 @@ public class ApiController {
   @Autowired
   private SimpMessagingTemplate messagingTemplate;
 
+  private User requireUser(HttpSession session, HttpServletResponse response) {
+    Object raw = session.getAttribute("u");
+    if (raw == null) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      return null;
+    }
+    User sessionUser = (User) raw;
+    return entityManager.find(User.class, sessionUser.getId());
+  }
+
+  private boolean friendshipExists(User a, User b) {
+    return !entityManager.createQuery(
+        "SELECT f FROM Friendship f WHERE (f.player1 = :a AND f.player2 = :b) "
+            + "OR (f.player1 = :b AND f.player2 = :a)",
+        Friendship.class)
+        .setParameter("a", a)
+        .setParameter("b", b)
+        .setMaxResults(1)
+        .getResultList()
+        .isEmpty();
+  }
+
+  private FriendRequest findRequest(User requester, User recipient) {
+    List<FriendRequest> results = entityManager.createQuery(
+        "SELECT fr FROM FriendRequest fr WHERE fr.requester = :requester AND fr.recipient = :recipient",
+        FriendRequest.class)
+        .setParameter("requester", requester)
+        .setParameter("recipient", recipient)
+        .setMaxResults(1)
+        .getResultList();
+    return results.isEmpty() ? null : results.get(0);
+  }
+
   /**
    * Posts a message to a topic.
    * 
@@ -160,9 +197,9 @@ public class ApiController {
 
     // build message, save to BD
     Message m = new Message();
-    m.setRecipient(null);
+  //  m.setRecipient(null);
     m.setSender(sender);
-    m.setTopic(target);
+  //  m.setTopic(target);
     m.setDateSent(LocalDateTime.now());
     m.setText(text);
     entityManager.persist(m);
@@ -204,5 +241,197 @@ public class ApiController {
         target.getMessages().stream()
           .map(Message::toTransfer).toArray()
       ));
+  }
+
+  @PostMapping("/friends/request")
+  @ResponseBody
+  @Transactional
+  public Map<String, String> requestFriend(@RequestBody JsonNode o, HttpSession session,
+      HttpServletResponse response) {
+    User requester = requireUser(session, response);
+    if (requester == null) {
+      return Map.of("error", "not logged in");
+    }
+    String username = o.hasNonNull("username") ? o.get("username").asText().trim() : "";
+    if (username.isEmpty()) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return Map.of("error", "username required");
+    }
+    User recipient;
+    try {
+      recipient = entityManager.createNamedQuery("User.byUsername", User.class)
+          .setParameter("username", username)
+          .getSingleResult();
+    } catch (Exception e) {
+      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+      return Map.of("error", "user not found");
+    }
+    if (requester.getId() == recipient.getId()) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return Map.of("error", "cannot request yourself");
+    }
+    if (friendshipExists(requester, recipient)) {
+      response.setStatus(HttpServletResponse.SC_CONFLICT);
+      return Map.of("error", "already friends");
+    }
+    FriendRequest reversePending = entityManager.createQuery(
+        "SELECT fr FROM FriendRequest fr WHERE fr.requester = :requester "
+            + "AND fr.recipient = :recipient AND fr.status = :status",
+        FriendRequest.class)
+        .setParameter("requester", recipient)
+        .setParameter("recipient", requester)
+        .setParameter("status", FriendRequest.Status.PENDING)
+        .setMaxResults(1)
+        .getResultList()
+        .stream()
+        .findFirst()
+        .orElse(null);
+    if (reversePending != null) {
+      response.setStatus(HttpServletResponse.SC_CONFLICT);
+      return Map.of("error", "pending request already exists");
+    }
+
+    FriendRequest existing = findRequest(requester, recipient);
+    if (existing != null) {
+      if (existing.getStatus() == FriendRequest.Status.PENDING) {
+        response.setStatus(HttpServletResponse.SC_CONFLICT);
+        return Map.of("error", "request already pending");
+      }
+      existing.setStatus(FriendRequest.Status.PENDING);
+      existing.setCreatedAt(LocalDateTime.now());
+      existing.setRespondedAt(null);
+      entityManager.persist(existing);
+      return Map.of("result", "request re-sent", "requestId", String.valueOf(existing.getId()));
+    }
+
+    FriendRequest fr = new FriendRequest();
+    fr.setRequester(requester);
+    fr.setRecipient(recipient);
+    fr.setStatus(FriendRequest.Status.PENDING);
+    fr.setCreatedAt(LocalDateTime.now());
+    entityManager.persist(fr);
+    entityManager.flush();
+    return Map.of("result", "request sent", "requestId", String.valueOf(fr.getId()));
+  }
+
+  @GetMapping("/friends/requests")
+  @ResponseBody
+  @Transactional
+  public List<FriendRequest.Transfer> pendingRequests(HttpSession session, HttpServletResponse response) {
+    User recipient = requireUser(session, response);
+    if (recipient == null) {
+      return List.of();
+    }
+    return entityManager.createQuery(
+        "SELECT fr FROM FriendRequest fr WHERE fr.recipient = :recipient AND fr.status = :status",
+        FriendRequest.class)
+        .setParameter("recipient", recipient)
+        .setParameter("status", FriendRequest.Status.PENDING)
+        .getResultList()
+        .stream()
+        .map(FriendRequest::toTransfer)
+        .toList();
+  }
+
+  @PostMapping("/friends/requests/{id}/accept")
+  @ResponseBody
+  @Transactional
+  public Map<String, String> acceptRequest(@PathVariable long id, HttpSession session,
+      HttpServletResponse response) {
+    User recipient = requireUser(session, response);
+    if (recipient == null) {
+      return Map.of("error", "not logged in");
+    }
+    FriendRequest fr = entityManager.find(FriendRequest.class, id);
+    if (fr == null) {
+      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+      return Map.of("error", "request not found");
+    }
+    if (fr.getRecipient().getId() != recipient.getId()) {
+      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      return Map.of("error", "not your request");
+    }
+    if (fr.getStatus() != FriendRequest.Status.PENDING) {
+      response.setStatus(HttpServletResponse.SC_CONFLICT);
+      return Map.of("error", "request already handled");
+    }
+
+    User requester = fr.getRequester();
+    if (!friendshipExists(requester, recipient)) {
+      Friendship friendship = new Friendship();
+      if (requester.getId() < recipient.getId()) {
+        friendship.setPlayer1(requester);
+        friendship.setPlayer2(recipient);
+      } else {
+        friendship.setPlayer1(recipient);
+        friendship.setPlayer2(requester);
+      }
+      friendship.setGamesPlayed(0);
+      friendship.setTimesBetrayed(0);
+      friendship.setAffinityScore(0);
+      entityManager.persist(friendship);
+    }
+    fr.setStatus(FriendRequest.Status.ACCEPTED);
+    fr.setRespondedAt(LocalDateTime.now());
+    entityManager.persist(fr);
+    return Map.of("result", "request accepted");
+  }
+
+  @PostMapping("/friends/requests/{id}/reject")
+  @ResponseBody
+  @Transactional
+  public Map<String, String> rejectRequest(@PathVariable long id, HttpSession session,
+      HttpServletResponse response) {
+    User recipient = requireUser(session, response);
+    if (recipient == null) {
+      return Map.of("error", "not logged in");
+    }
+    FriendRequest fr = entityManager.find(FriendRequest.class, id);
+    if (fr == null) {
+      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+      return Map.of("error", "request not found");
+    }
+    if (fr.getRecipient().getId() != recipient.getId()) {
+      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      return Map.of("error", "not your request");
+    }
+    if (fr.getStatus() != FriendRequest.Status.PENDING) {
+      response.setStatus(HttpServletResponse.SC_CONFLICT);
+      return Map.of("error", "request already handled");
+    }
+    fr.setStatus(FriendRequest.Status.REJECTED);
+    fr.setRespondedAt(LocalDateTime.now());
+    entityManager.persist(fr);
+    return Map.of("result", "request rejected");
+  }
+
+  @GetMapping("/friends")
+  @ResponseBody
+  @Transactional
+  public Map<String, List<Map<String, Object>>> listFriends(HttpSession session, HttpServletResponse response) {
+    User user = requireUser(session, response);
+    if (user == null) {
+      return Map.of("friends", List.of());
+    }
+    List<Friendship> friendships = entityManager.createQuery(
+        "SELECT f FROM Friendship f WHERE f.player1 = :user OR f.player2 = :user",
+        Friendship.class)
+        .setParameter("user", user)
+        .getResultList();
+
+    List<Map<String, Object>> friends = new ArrayList<>();
+    for (Friendship friendship : friendships) {
+      User friend = friendship.getPlayer1().getId() == user.getId()
+          ? friendship.getPlayer2()
+          : friendship.getPlayer1();
+      friends.add(Map.of(
+          "userId", friend.getId(),
+          "username", friend.getUsername(),
+          "gamesPlayed", friendship.getGamesPlayed(),
+          "timesBetrayed", friendship.getTimesBetrayed(),
+          "affinityScore", friendship.getAffinityScore()
+      ));
+    }
+    return Map.of("friends", friends);
   }
 }

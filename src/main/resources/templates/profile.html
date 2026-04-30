@@ -59,6 +59,50 @@
                         </div>
                     </div>
 
+                    <h4 class="mb-3">Estadisticas UNO</h4>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="card text-center shadow-sm h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted">+2 jugados</h6>
+                                    <h3 class="card-text" th:text="${u.drawTwoPlayed}">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center shadow-sm h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted">+4 jugados</h6>
+                                    <h3 class="card-text" th:text="${u.drawFourPlayed}">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center shadow-sm h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted">+2 robados</h6>
+                                    <h3 class="card-text" th:text="${u.drawTwoDrawn}">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center shadow-sm h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted">+4 robados</h6>
+                                    <h3 class="card-text" th:text="${u.drawFourDrawn}">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center shadow-sm h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted">Veces con 1 carta</h6>
+                                    <h3 class="card-text" th:text="${u.oneCardMoments}">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <h4 class="mb-3">Logros</h4>
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -123,10 +167,38 @@
                 </div>
                 
             </div>
+
+            <div class="row mt-4">
+                <div class="col-lg-6">
+                    <h4 class="mb-3">Buscar jugador</h4>
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <form id="friend-search-form" class="mb-2">
+                                <div class="input-group">
+                                    <input id="friend-search-input" class="form-control" type="text" placeholder="Username exacto" required>
+                                    <button id="friend-search-submit" class="btn btn-primary" type="submit">Enviar solicitud</button>
+                                </div>
+                            </form>
+                            <div id="friend-feedback" class="small text-muted"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-4 mt-lg-0">
+                    <h4 class="mb-3">Solicitudes pendientes</h4>
+                    <div class="card shadow-sm mb-3">
+                        <ul id="friend-requests" class="list-group list-group-flush"></ul>
+                    </div>
+                    <h4 class="mb-3">Amigos</h4>
+                    <div class="card shadow-sm">
+                        <ul id="friend-list" class="list-group list-group-flush"></ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
+    <script th:src="@{/js/friend-requests.js}"></script>
 </body>
 
 </html>
