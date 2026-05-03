@@ -6,7 +6,7 @@
 [ ]Añadir contraseña y completar partida privada 
 
 ------------- Cambios en Game
-[ ]Dentro del juego, hacer vista más bonita - GAME
+[X]Dentro del juego, hacer vista más bonita - GAME
 [X]Hacer turno del jugador más obvio, mostrar mensajes de "ME QUEDA UNA", "HAS GANADO LA PARTIDA", "PEPITO  HA GANADO LA PARTIDA, HAS PERDIDO" - GAME
 [ ]Poder denunciar mensajes en el chat, y que estos mensajes le lleguen al admin
  
