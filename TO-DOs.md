@@ -3,7 +3,7 @@
 [X]Cuando sé gane, hacer que los jugadores vuelvan a lobby 
 [X]Que funcione el chat del lobby
 [ ]Quitar botón refrescar, debería refrescarse solo 
-[ ]Añadir contraseña y completar partida privada 
+[ ]Añadir contraseña y completar partida privada
 
 ------------- Cambios en Game
 [X]Dentro del juego, hacer vista más bonita - GAME
@@ -15,6 +15,7 @@
 
 ------------- Cambios en admin
 [ ]Poder ver los chats (viewChat)
+[ ]Cambiar últimos 5 mensajes a mensajes denunciados
 [ ]Poder borrar mensajes
 [X]Poder banear usuarios del chat y de la partida
 [X]Poder cerrar lobbys
@@ -24,3 +25,4 @@
 [ ]Automatización con bot sencillito (jugar cartas que tenga y ya) - GENERAL
 [ ]Volver a poner el jugador que soy en el perfil, estaba en la plantilla! - NAVBAR
 [ ]Testing de funcionalidades, karate y lo otro -> TESTING
+[ ]Actualizar modelo de BD y readme al final!

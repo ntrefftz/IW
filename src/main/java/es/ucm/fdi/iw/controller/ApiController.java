@@ -156,7 +156,8 @@ public class ApiController {
         .getResultList()
         .isEmpty();
   }
-
+  
+  //Se puede cambiar por name query?
   private FriendRequest findRequest(User requester, User recipient) {
     List<FriendRequest> results = entityManager.createQuery(
         "SELECT fr FROM FriendRequest fr WHERE fr.requester = :requester AND fr.recipient = :recipient",
