@@ -135,7 +135,7 @@ public class LobbyService {
     }
 
     @Transactional
-    public void updateLobbySettings(String code, User user, String modalidad, boolean privado) {
+    public void updateLobbySettings(String code, User user, String modalidad, boolean privado, String password) {
         Game game = getLobbyByCode(code);
 
         if (!isOwner(game, user)) {
@@ -150,6 +150,11 @@ public class LobbyService {
         game.setPrivado(privado);
         if (!privado) {
             game.setPassword(null);
+            return;
+        }
+
+        if (password != null && !password.isBlank()) {
+            game.setPassword(password.trim());
         }
     }
 

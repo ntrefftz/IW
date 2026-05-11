@@ -51,6 +51,13 @@ public class User implements Transferable<User.Transfer> {
   private int drawTwoDrawn;
   private int drawFourDrawn;
   private int oneCardMoments;
+
+  @Lob
+  @Basic(fetch = FetchType.LAZY)
+  private byte[] profilePic;
+
+  @Column(length = 100)
+  private String profilePicContentType;
   
   /**
    * Checks whether this user has a given role.

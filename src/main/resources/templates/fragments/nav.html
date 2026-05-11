@@ -25,18 +25,15 @@
                             <li class="nav-item mx-2">
                                 <a class="nav-link" th:href="@{/lobby-select}" href="/lobby-select">Selector de lobbies</a>
                             </li>
-                            <li class="nav-item mx-2">
-                                <a class="nav-link" th:href="@{/profile}" href="/profile">Perfil</a>
-                            </li>
                             <li class="nav-item mx-3">
                                 <a class="nav-link" th:if="${u.hasRole('ADMIN')}" th:href="@{/admin/}">Administrar</a>
                             </li>
-                            <!-- <li class="nav-item mx-2">
-                                <a class="nav-link" th:href="@{/user/{id}(id=${u.id})}">
+                            <li class="nav-item mx-2">
+                                <a class="nav-link" th:href="@{/profile}">
                                     <img class="iwthumb rounded" th:src="@{/user/{id}/pic(id=${u.id})}">
                                     <span th:text="${u.username}">Pepe</span>
                                 </a>
-                            </li> -->
+                            </li>
                             <li class="nav-item align-self-center">
                                 <form th:action="@{/logout}" method="post">
                                     <button type="submit" class="btn btn-outline-secondary btn-sm">logout</button>

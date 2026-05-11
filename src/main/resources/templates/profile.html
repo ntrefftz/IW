@@ -11,23 +11,31 @@
 
     <main class="flex-shrink-0">
         <div class="container mt-5 mb-5">
-            
-            <h1 class="mb-4">Perfil de Usuario</h1>
+
+            <h1 class="mb-4">Tú Perfil</h1>
 
             <div class="card mb-4 shadow-sm">
                 <div class="card-body d-flex align-items-center">
-                    <!-- Por ahora no hay imagen x defecto pero ya se añadira  -->
-                    <img th:src="@{/img/default-avatar.jpg}" class="rounded-circle me-4" alt="Avatar" style="width: 100px; height: 100px; object-fit: cover;">
+                    <img id="current-avatar" th:src="@{/user/{id}/pic(id=${u.id})}" class="rounded-circle me-4" alt="Avatar"
+                        style="width: 100px; height: 100px; object-fit: cover;">
                     <div>
                         <h2 class="card-title mb-1"><span th:text="${u.username}">Usuario</span></h2>
-                        </h2>                        
+                        </h2>
+                    </div>
+                    <div id="profile" class=" ms-auto border border-2 border-tertiary rounded">
+                        <form id="avatar-form" th:action="@{/user/{id}/pic(id=${u.id})}" method="post" enctype="multipart/form-data">
+                            <input type="file" id="f_avatar" name="photo" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                            <img class="preview" id="avatar" alt="careto a subir" />
+                            <button id="postAvatar" type="submit">Usar como foto de perfil</button>
+                            <div id="avatar-feedback" class="small mt-2"></div>
+                        </form>
                     </div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-lg-8">
-                    
+
 
 
                     <h4 class="mb-3">Estadisticas</h4>
@@ -74,7 +82,7 @@
                         </div>
                     </div>
 
-                   
+
                 </div>
 
                 <div class="col-lg-4 mt-4 mt-lg-0">
@@ -83,7 +91,7 @@
                         <ul id="friend-list" class="list-group list-group-flush"></ul>
                     </div>
                 </div>
-                
+
             </div>
 
             <div class="row mt-4">
@@ -93,8 +101,10 @@
                         <div class="card-body">
                             <form id="friend-search-form" class="mb-2">
                                 <div class="input-group">
-                                    <input id="friend-search-input" class="form-control" type="text" placeholder="Nombre de usuario" required>
-                                    <button id="friend-search-submit" class="btn btn-primary" type="submit">Enviar solicitud</button>
+                                    <input id="friend-search-input" class="form-control" type="text"
+                                        placeholder="Nombre de usuario" required>
+                                    <button id="friend-search-submit" class="btn btn-primary" type="submit">Enviar
+                                        solicitud</button>
                                 </div>
                             </form>
                             <div id="friend-feedback" class="small text-muted"></div>
@@ -106,8 +116,8 @@
                     <div class="card shadow-sm mb-3">
                         <ul id="friend-requests" class="list-group list-group-flush"></ul>
                     </div>
-        
-                    
+
+
                 </div>
             </div>
         </div>
@@ -115,6 +125,7 @@
 
     <th:block th:replace="~{fragments/footer.html :: footer}" />
     <script th:src="@{/js/friend-requests.js}"></script>
+    <script th:src="@{/js/profile.js}" src="/js/profile.js"></script>
 </body>
 
 </html>

@@ -1,6 +1,5 @@
 package es.ucm.fdi.iw.controller;
 
-import es.ucm.fdi.iw.LocalData;
 import es.ucm.fdi.iw.model.Message;
 import es.ucm.fdi.iw.model.Transferable;
 import es.ucm.fdi.iw.model.User;
@@ -9,12 +8,14 @@ import es.ucm.fdi.iw.model.User.Role;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,12 +55,10 @@ import java.util.stream.Collectors;
 public class UserController {
 
   private static final Logger log = LogManager.getLogger(UserController.class);
+  private static final long MAX_PROFILE_PIC_BYTES = 2 * 1024 * 1024;
 
   @Autowired
   private EntityManager entityManager;
-
-  @Autowired
-  private LocalData localData;
 
   @Autowired
   private SimpMessagingTemplate messagingTemplate;
@@ -187,6 +185,12 @@ public class UserController {
             "static/img/default-pic.jpg")));
   }
 
+  private static byte[] defaultPicBytes() throws IOException {
+    try (InputStream in = defaultPic()) {
+      return in.readAllBytes();
+    }
+  }
+
   /**
    * Downloads a profile pic for a user id
    * 
@@ -195,10 +199,26 @@ public class UserController {
    * @throws IOException
    */
   @GetMapping("{id}/pic")
-  public StreamingResponseBody getPic(@PathVariable long id) throws IOException {
-    File f = localData.getFile("user", "" + id + ".jpg");
-    InputStream in = new BufferedInputStream(f.exists() ? new FileInputStream(f) : UserController.defaultPic());
-    return os -> FileCopyUtils.copy(in, os);
+  public ResponseEntity<byte[]> getPic(@PathVariable long id) throws IOException {
+    User target = entityManager.find(User.class, id);
+    byte[] data = target != null ? target.getProfilePic() : null;
+    String contentType = target != null ? target.getProfilePicContentType() : null;
+    if (data == null || data.length == 0) {
+      data = defaultPicBytes();
+      contentType = "image/jpeg";
+    }
+    MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+    if (contentType != null && !contentType.isBlank()) {
+      try {
+        mediaType = MediaType.parseMediaType(contentType);
+      } catch (IllegalArgumentException ignored) {
+        mediaType = MediaType.APPLICATION_OCTET_STREAM;
+      }
+    }
+    return ResponseEntity.ok()
+        .contentType(mediaType)
+        .cacheControl(CacheControl.noCache())
+        .body(data);
   }
 
   /**
@@ -210,6 +230,7 @@ public class UserController {
    */
   @PostMapping("{id}/pic")
   @ResponseBody
+  @Transactional
   public String setPic(@RequestParam("photo") MultipartFile photo, @PathVariable long id,
       HttpServletResponse response, HttpSession session, Model model) throws IOException {
 
@@ -224,18 +245,26 @@ public class UserController {
     }
 
     log.info("Updating photo for user {}", id);
-    File f = localData.getFile("user", "" + id + ".jpg");
     if (photo.isEmpty()) {
-      log.info("failed to upload photo: emtpy file?");
-    } else {
-      try (BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(f))) {
-        byte[] bytes = photo.getBytes();
-        stream.write(bytes);
-        log.info("Uploaded photo for {} into {}!", id, f.getAbsolutePath());
-      } catch (Exception e) {
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        log.warn("Error uploading " + id + " ", e);
-      }
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return "{\"status\":\"empty file\"}";
+    }
+    if (photo.getSize() > MAX_PROFILE_PIC_BYTES) {
+      response.setStatus(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+      return "{\"status\":\"file too large\"}";
+    }
+    String contentType = photo.getContentType();
+    if (contentType == null ||
+        (!contentType.equals("image/jpeg") && !contentType.equals("image/png"))) {
+      response.setStatus(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+      return "{\"status\":\"unsupported type\"}";
+    }
+    try {
+      target.setProfilePic(photo.getBytes());
+      target.setProfilePicContentType(contentType);
+    } catch (Exception e) {
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      log.warn("Error uploading " + id + " ", e);
     }
     return "{\"status\":\"photo uploaded correctly\"}";
   }

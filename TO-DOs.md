@@ -2,8 +2,7 @@
 [X]Hacer que al comenzar una partida no haga falta un refresh, sino que redirija solo.
 [X]Cuando sé gane, hacer que los jugadores vuelvan a lobby 
 [X]Que funcione el chat del lobby
-[ ]Quitar botón refrescar, debería refrescarse solo 
-[ ]Añadir contraseña y completar partida privada
+[X]Añadir contraseña y completar partida privada
 
 ------------- Cambios en Game
 [X]Dentro del juego, hacer vista más bonita - GAME
@@ -23,6 +22,6 @@
 ------------- Otros cambios
 [ ]PONER TODO EL PUTO ESTILO IGUAL. - GENERAL
 [ ]Automatización con bot sencillito (jugar cartas que tenga y ya) - GENERAL
-[ ]Volver a poner el jugador que soy en el perfil, estaba en la plantilla! - NAVBAR
+[X]Volver a poner el jugador que soy en el perfil, estaba en la plantilla! - NAVBAR
 [ ]Testing de funcionalidades, karate y lo otro -> TESTING
 [ ]Actualizar modelo de BD y readme al final!

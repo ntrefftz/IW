@@ -82,6 +82,16 @@
                                             </div>
                                         </div>
 
+                                        <div class="col-12">
+                                            <label for="lobbyPassword" class="form-label fw-semibold">Contraseña (solo privada)</label>
+                                            <input type="password"
+                                                   id="lobbyPassword"
+                                                   name="password"
+                                                   class="form-control"
+                                                   placeholder="Deja en blanco para mantener la actual"
+                                                   th:disabled="${!isOwner}">
+                                        </div>
+
                                         <div class="col-12" data-owner-only th:classappend="${!isOwner} ? ' d-none' : ''">
                                             <button type="submit" class="btn btn-primary">Guardar configuración</button>
                                         </div>

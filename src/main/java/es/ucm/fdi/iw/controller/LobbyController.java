@@ -124,11 +124,22 @@ public class LobbyController {
             Game lobby = lobbyService.getLobbyByCode(lobbyCode);
             String normalizedLobbyCode = lobby.getCode();
 
+            User currentUser = (User) session.getAttribute("u");
+            if (currentUser == null) {
+                throw new LobbyException("Debes iniciar sesion para unirte a la sala");
+            }
+
+            if (!lobbyService.isMember(lobby, currentUser)) {
+                if (lobby.isPrivado()) {
+                    throw new LobbyException("Necesitas una contrasena para entrar en este lobby");
+                }
+                lobbyService.attemptJoin(normalizedLobbyCode, null, currentUser);
+                lobby = lobbyService.getLobbyByCode(normalizedLobbyCode);
+            }
+
             if (lobby.getEstado() == Game.Estado.PARTIDA) {
                 return "redirect:/game?code=" + normalizedLobbyCode;
             }
-
-            User currentUser = (User) session.getAttribute("u");
             boolean isOwner = lobbyService.isOwner(lobby, currentUser);
 
             List<User> players = lobby.getPlayers().stream().limit(4).toList();
@@ -152,11 +163,12 @@ public class LobbyController {
     public String updateSettings(@RequestParam String code,
                                  @RequestParam String modalidad,
                                  @RequestParam boolean privado,
+                                 @RequestParam(required = false) String password,
                                  HttpSession session,
                                  RedirectAttributes ra) {
         try {
             User currentUser = (User) session.getAttribute("u");
-            lobbyService.updateLobbySettings(code, currentUser, modalidad, privado);
+            lobbyService.updateLobbySettings(code, currentUser, modalidad, privado, password);
             broadcastLobbyState(lobbyService.getLobbyByCode(code));
             return "redirect:/lobby?code=" + code;
         } catch (LobbyException e) {
