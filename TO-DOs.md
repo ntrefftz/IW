@@ -20,7 +20,7 @@
 [X]Poder cerrar lobbys
 
 ------------- Otros cambios
-[ ]PONER TODO EL PUTO ESTILO IGUAL. - GENERAL
+[ ]PONER TODO EL ESTILO IGUAL. - GENERAL
 [ ]Automatización con bot sencillito (jugar cartas que tenga y ya) - GENERAL
 [X]Volver a poner el jugador que soy en el perfil, estaba en la plantilla! - NAVBAR
 [ ]Testing de funcionalidades, karate y lo otro -> TESTING
