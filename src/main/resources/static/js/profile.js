@@ -57,6 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const file = fileInput.files && fileInput.files[0];
         if (!file) {
             preview.removeAttribute("src");
+            preview.classList.add("d-none");
+            submitButton.classList.add("d-none");
             return;
         }
         const validation = validateFile(file);
@@ -64,10 +66,16 @@ document.addEventListener("DOMContentLoaded", () => {
             setFeedback("alert-warning", validation.message);
             fileInput.value = "";
             preview.removeAttribute("src");
+            preview.classList.add("d-none");
+            submitButton.classList.add("d-none");
             return;
         }
         clearFeedback();
-        readImageFileData(file, preview);
+        fileToDataUrl(file).then(dataUrl => {
+            preview.src = dataUrl;
+            preview.classList.remove("d-none");
+            submitButton.classList.remove("d-none");
+        });
     });
 
     submitButton.addEventListener("click", (event) => {
@@ -92,6 +100,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (currentAvatar) {
                     currentAvatar.src = `${form.action}?t=${Date.now()}`;
                 }
+                preview.classList.add("d-none");
+                submitButton.classList.add("d-none");
+                fileInput.value = "";
             })
             .catch((err) => {
                 let message = "No se pudo subir la imagen.";

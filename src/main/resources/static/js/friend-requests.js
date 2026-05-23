@@ -145,7 +145,15 @@
                 return loadRequests();
             })
             .catch((err) => {
-                setFeedback(err && err.text ? err.text : "No se pudo enviar la solicitud.", true);
+                let msg = err && err.text ? err.text : "No se pudo enviar la solicitud.";
+                if (err && err.text) {
+                    try {
+                        const parsed = JSON.parse(err.text);
+                        if (parsed.error === "already friends") msg = "Ya sois amigos o hay una solicitud en curso.";
+                        else if (parsed.error) msg = parsed.error;
+                    } catch(e) {}
+                }
+                setFeedback(msg, true);
             });
     });
 

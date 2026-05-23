@@ -120,6 +120,10 @@ public class AdminController {
   public String viewChat(@PathVariable long id, Model model) {
     Game target = entityManager.find(Game.class, id);
     model.addAttribute("game", target);
+    java.util.List<es.ucm.fdi.iw.model.Message> messages = entityManager.createQuery("SELECT m FROM Message m WHERE m.game.id = :gameId ORDER BY m.dateSent ASC", es.ucm.fdi.iw.model.Message.class)
+        .setParameter("gameId", id)
+        .getResultList();
+    model.addAttribute("messages", messages);
     return "chat";
   }
 

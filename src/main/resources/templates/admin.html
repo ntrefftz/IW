@@ -18,35 +18,6 @@
     <main class="container-fluid d-flex justify-content-center">
         <div class="contenedor-admin m-5 ">
             <h1 class="titulo-admin">Gestión de usuarios</h1>
-            <button id="botonAnadir" class="btn btn-primary boton-anadir mb-3">Añadir usuario</button>
-            <div id="modalUsuario" class="modal-usuario" style="display:none;">
-                <div class="modal-contenido">
-                    <div class="container d-flex mt-4">
-                        <span id="cerrarModal" class="modal-cerrar text-danger fw-bold px-3"
-                            style="font-size: 2rem; cursor:pointer;">&times;</span>
-                        <h4 class="mb-3">Nuevo usuario</h4>
-                    </div>
-                    <form id="formUsuario" class="container">
-                        <div class="row g-3 align-items-center">
-                            <div class="col-md-4">
-                                <label for="nombreUsuario" class="form-label">Nombre y apellidos</label>
-                                <input type="text" id="nombreUsuario" class="form-control" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="rolUsuario" class="form-label">Rol</label>
-                                <input type="text" id="rolUsuario" class="form-control" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="grupoUsuario" class="form-label">Grupo</label>
-                                <input type="text" id="grupoUsuario" class="form-control">
-                            </div>
-                            <div class="col-md-2 ">
-                                <button type="submit" class="btn btn-primary w-100">Añadir</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
             <h3 class="mt-5">Usuarios</h3>
             <table id="tablaUsuarios"
                 class="tabla-usuarios table table-striped table-hover align-middle table-bordered">
@@ -110,13 +81,13 @@
                                 style="display: inline-block;">
                                 <button type="submit" class="btn-close-game game-toggle btn btn-sm btn-outline-danger"
                                     aria-label="cerrar partida" title="Cerrar partida">
-                                    <img th:src="@{/img/icons/ban.svg}" height="18px">
+                                    <img th:src="@{/img/icons/ban.svg}" height="18px" alt="Cerrar partida">
                                 </button>
                             </form>
                             <button th:onclick="'abrirChat(' + ${lobby.id} + ')'"
                                 class="chat-view btn btn-sm btn-outline-danger " aria-label="cerrar partida"
                                 title="Ver chat">
-                                <img th:src="@{/img/icons/chat.svg}" height="18px">
+                                <img th:src="@{/img/icons/chat.svg}" height="18px" alt="Icono de chat">
                             </button>
                         </td>
                     </tr>
@@ -178,7 +149,7 @@
         });
 
         function abrirChat(id) {
-            const url = '/viewChat/' + id;
+            const url = '/admin/viewChat/' + id;
             const params = 'width=400,height=600,menubar=no,toolbar=no,location=no,status=no';
             window.open(url, 'ChatPartida' + id, params);
         }
@@ -195,8 +166,8 @@
                     }
                     dt = new DataTable('#messages', {
                         data: {
-                            headings: ['from', 'to', 'text'],
-                            data: d
+                            headings: ['From', 'Game', 'Text'],
+                            data: d.map(m => [m.sender, m.game, m.text])
                         },
                         searchable: true,
                         paging: false

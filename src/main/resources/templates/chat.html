@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html class="h-100" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: header}" />
+    <title>Chat de Partida</title>
+</head>
+
+<body class="d-flex flex-column h-100 bg-light">
+    <div class="container mt-3 flex-shrink-0">
+        <h4 th:text="'Chat Partida: ' + ">Chat</h4>
+        <div class="card shadow-sm mt-3">
+            <div class="card-body" style="height: 450px; overflow-y: auto;">
+                <div th:if="" class="text-muted">No hay mensajes en esta partida.</div>
+                <ul class="list-unstyled">
+                    <li th:each="msg : " class="mb-2">
+                        <span class="badge bg-secondary" th:text=""></span>
+                        <strong th:text="" class="text-primary"></strong>: 
+                        <span th:text=""></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

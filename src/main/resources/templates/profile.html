@@ -12,7 +12,7 @@
     <main class="flex-shrink-0">
         <div class="container mt-5 mb-5">
 
-            <h1 class="mb-4">Tú Perfil</h1>
+            <h1 class="mb-4">Tu Perfil</h1>
 
             <div class="card mb-4 shadow-sm">
                 <div class="card-body d-flex align-items-center">
@@ -22,12 +22,17 @@
                         <h2 class="card-title mb-1"><span th:text="${u.username}">Usuario</span></h2>
                         </h2>
                     </div>
-                    <div id="profile" class=" ms-auto border border-2 border-tertiary rounded">
-                        <form id="avatar-form" th:action="@{/user/{id}/pic(id=${u.id})}" method="post" enctype="multipart/form-data">
-                            <input type="file" id="f_avatar" name="photo" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
-                            <img class="preview" id="avatar" alt="careto a subir" />
-                            <button id="postAvatar" type="submit">Usar como foto de perfil</button>
-                            <div id="avatar-feedback" class="small mt-2"></div>
+                    <div id="profile" class="ms-auto border border-2 border-tertiary rounded p-2">
+                        <form id="avatar-form" th:action="@{/user/{id}/pic(id=${u.id})}" method="post" enctype="multipart/form-data" class="d-flex align-items-center">
+                            <label for="f_avatar" class="btn btn-outline-primary mb-0 me-2" title="Cambiar foto">
+                                <i class="bi bi-camera"></i> <span class="d-none d-sm-inline">Seleccionar</span>
+                            </label>
+                            <input type="file" id="f_avatar" name="photo" accept=".jpg,.jpeg,.png,image/jpeg,image/png" class="d-none">
+                            <img class="preview rounded me-2 d-none" id="avatar" alt="Previsualización" style="width: 40px; height: 40px; object-fit: cover;" />
+                            <button id="postAvatar" type="submit" class="btn btn-primary d-none" title="Guardar foto">
+                                <i class="bi bi-upload"></i> <span class="d-none d-sm-inline">Subir</span>
+                            </button>
+                            <div id="avatar-feedback" class="small ms-2"></div>
                         </form>
                     </div>
                 </div>
