@@ -47,6 +47,11 @@
                                                 th:if="${slotStat.index < #lists.size(players) and players[slotStat.index].username != null and players[slotStat.index].username == lobby.host.username}">Owner</span>
                                         </li>
                                     </ul>
+                                    <div class="mt-3 p-3 bg-light rounded text-center">
+                                        <div class="text-muted small text-uppercase">Jugadores conectados</div>
+                                        <div id="lobbyPlayersKpi" class="display-6 fw-bold text-primary" th:text="${#lists.size(players)}">1</div>
+                                        <div class="text-muted small">de <span th:text="${maxPlayers}">4</span> máximos</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
