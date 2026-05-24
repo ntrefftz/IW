@@ -15,7 +15,7 @@
         w: 80,
         h: 120,
         r: 8,
-        handGap: 42,
+        handGap: 60,
         boardCenterX: 550,
         boardCenterY: 290,
         colors: {
