@@ -117,13 +117,14 @@ public class AdminController {
 
   @GetMapping("/viewChat/{id}") // WIP ver chat
   @Transactional
-  public String viewChat(@PathVariable long id, Model model) {
+  public String   viewChat(@PathVariable long id, Model model) {
     Game target = entityManager.find(Game.class, id);
     model.addAttribute("game", target);
     java.util.List<es.ucm.fdi.iw.model.Message> messages = entityManager.createQuery("SELECT m FROM Message m WHERE m.game.id = :gameId ORDER BY m.dateSent ASC", es.ucm.fdi.iw.model.Message.class)
         .setParameter("gameId", id)
         .getResultList();
     model.addAttribute("messages", messages);
+    model.addAttribute("topics", "lobby/" + target.getCode());
     return "chat";
   }
 
@@ -177,4 +178,41 @@ public class AdminController {
     }
     return "{\"admin\": \"populated\"}";
   }
+
+@PostMapping("/chatBanByUsername/{username}")
+@Transactional
+@ResponseBody
+public String chatBanByUsername(@PathVariable String username) {
+  User target = entityManager.createNamedQuery("User.byUsername", User.class)
+      .setParameter("username", username)
+      .getResultStream()
+      .findFirst()
+      .orElse(null);
+
+  if (target == null) {
+    return "{\"error\":\"USER_NOT_FOUND\"}";
+  }
+
+  target.setChatBan(!target.isChatBan());
+  return "{\"chatBan\":" + target.isChatBan() + "}";
 }
+@PostMapping("/banByUsername/{username}")
+@Transactional
+@ResponseBody
+public String banByUsername(@PathVariable String username) {
+  User target = entityManager.createNamedQuery("User.byUsername", User.class)
+      .setParameter("username", username)
+      .getResultStream()
+      .findFirst()
+      .orElse(null);
+
+  if (target == null) {
+    return "{\"error\":\"USER_NOT_FOUND\"}";
+  }
+
+  target.setEnabled(!target.isEnabled());
+  return "{\"enabled\":" + target.isEnabled() + "}";
+}
+
+}
+

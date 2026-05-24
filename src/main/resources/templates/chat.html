@@ -7,20 +7,46 @@
 </head>
 
 <body class="d-flex flex-column h-100 bg-light">
-    <div class="container mt-3 flex-shrink-0">
-        <h4 th:text="'Chat Partida: ' + ">Chat</h4>
-        <div class="card shadow-sm mt-3">
-            <div class="card-body" style="height: 450px; overflow-y: auto;">
-                <div th:if="" class="text-muted">No hay mensajes en esta partida.</div>
-                <ul class="list-unstyled">
-                    <li th:each="msg : " class="mb-2">
-                        <span class="badge bg-secondary" th:text=""></span>
-                        <strong th:text="" class="text-primary"></strong>: 
-                        <span th:text=""></span>
-                    </li>
-                </ul>
+
+    <div class="d-flex justify-content-end mb-2">
+        <button type="button" class="btn btn-danger btn-sm" th:attr="data-code=${game.code}" id="closeLobbyBtn">
+            Cerrar lobby
+        </button>
+    </div>
+
+    <div id="lobbyChatMessages" class="border rounded p-3 bg-white" style="height: auto; overflow-y: auto;">
+        <p class="text-muted mb-0" id="lobbyChatEmpty" th:if="${#lists.isEmpty(messages)}">
+            Todavía no hay mensajes. ¡Habla con tu lobby!
+        </p>
+
+        <div th:if="${!#lists.isEmpty(messages)}">
+            <div th:each="msg : ${messages}" class="mb-2">
+                <div>
+                    <div class="small text-muted"
+                        th:text="${msg.sender.username} + ' · ' + ${#temporals.format(msg.dateSent, 'HH:mm')}">
+                        Usuario · 12:34
+                    </div>
+                    <div class="small" th:text="${msg.text}">Mensaje</div>
+                </div>
+
+                <div class="btn-group btn-group-sm ms-2" role="group" th:attr="data-username=${msg.sender.username}">
+                    <button type="button" class="btn btn-outline-warning js-chat-mute">Mutear</button>
+                    <button type="button" class="btn btn-outline-danger js-chat-ban">Banear</button>
+                </div>
             </div>
         </div>
     </div>
+
+
+    <th:block th:replace="~{fragments/footer.html :: footer}" />
+    <script th:inline="javascript">
+        window.initialUnoState = {
+            lobbyCode: /*[[${game.code}]]*/ ""
+        };
+        window.isAdminChat = true;
+    </script>
+    <script th:src="@{/js/chat.js}" src="/js/chat.js"></script>
+    <script th:src="@{/js/chatView.js}" src="/js/chatView.js"></script>
 </body>
+
 </html>

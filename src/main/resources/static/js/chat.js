@@ -10,6 +10,7 @@
         code: (window.initialUnoState && window.initialUnoState.lobbyCode) || "",
         currentUsername: (window.initialUnoState && window.initialUnoState.currentUsername) || ""
     };
+    const isAdminChat = window.isAdminChat === true;
 
     function absolutePath(path) {
         const base = (config && config.rootUrl ? config.rootUrl : "").replace(/\/+$/, "");
@@ -30,6 +31,21 @@
             chatError.classList.add("d-none");
         }
     }
+    function muteUser(username) {
+        if (!username) {
+            return;
+        }
+        go(`/admin/chatBanByUsername/${encodeURIComponent(username)}`, "POST")
+            .catch((e) => console.error("Error muteando:", e));
+    }
+
+    function banUser(username) {
+        if (!username) {
+            return;
+        }
+        go(`/admin/banByUsername/${encodeURIComponent(username)}`, "POST")
+            .catch((e) => console.error("Error baneando:", e));
+    }
 
     function formatTime(value) {
         if (!value) {
@@ -42,7 +58,7 @@
         return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
 
-    function appendChatMessage(message) {
+  function appendChatMessage(message) {
         if (!chatMessages || !message) {
             return;
         }
@@ -51,8 +67,9 @@
         }
 
         const row = document.createElement("div");
-        row.className = "mb-2";
+        row.className = "mb-2 d-flex justify-content-between align-items-start gap-2";
 
+        const content = document.createElement("div");
         const header = document.createElement("div");
         header.className = "small text-muted";
         const author = (message.from || "Anonimo").toString();
@@ -66,8 +83,32 @@
         }
         text.textContent = (message.message || "").toString();
 
-        row.appendChild(header);
-        row.appendChild(text);
+        content.appendChild(header);
+        content.appendChild(text);
+
+        row.appendChild(content);
+
+        if (isAdminChat) {
+            const actions = document.createElement("div");
+            actions.className = "btn-group btn-group-sm ms-2";
+
+            const muteBtn = document.createElement("button");
+            muteBtn.type = "button";
+            muteBtn.className = "btn btn-outline-warning";
+            muteBtn.textContent = "Mutear";
+            muteBtn.addEventListener("click", () => muteUser(author));
+
+            const banBtn = document.createElement("button");
+            banBtn.type = "button";
+            banBtn.className = "btn btn-outline-danger";
+            banBtn.textContent = "Banear";
+            banBtn.addEventListener("click", () => banUser(author));
+
+            actions.appendChild(muteBtn);
+            actions.appendChild(banBtn);
+            row.appendChild(actions);
+        }
+
         chatMessages.appendChild(row);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
